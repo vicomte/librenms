@@ -23,5 +23,10 @@ $fields = array(
 );
 
 $tags = compact('name', 'app_id', 'rrd_name', 'rrd_def');
-update_application($app, $resp);
+if ($display_memory > 1900000000 || $display_cpu > .5) {
+  $status = "ERROR"; 
+} else {
+  $status = "OK";
+}
+update_application($app, $resp, $status);
 data_update($device, $name, $tags, $fields);
