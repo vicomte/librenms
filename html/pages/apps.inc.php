@@ -1,5 +1,10 @@
 <?php
 
+$graphs['svdisplayapp']    = array(
+    'mem',
+    'cpu',
+);
+
 $graphs['apache']    = array(
     'bits',
     'hits',
