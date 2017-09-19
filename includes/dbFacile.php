@@ -19,6 +19,16 @@
 
 use LibreNMS\Exceptions\DatabaseConnectException;
 
+function dbIsConnected()
+{
+    global $database_link;
+    if (empty($database_link)) {
+        return false;
+    }
+
+    return mysqli_ping($database_link);
+}
+
 /**
  * Connect to the database.
  * Will use global $config variables if they are not sent: db_host, db_user, db_pass, db_name, db_port, db_socket
@@ -35,6 +45,11 @@ use LibreNMS\Exceptions\DatabaseConnectException;
 function dbConnect($host = null, $user = '', $password = '', $database = '', $port = null, $socket = null)
 {
     global $config, $database_link;
+
+    if (dbIsConnected()) {
+        return $database_link;
+    }
+
     $host = empty($host) ? $config['db_host'] : $host;
     $user = empty($user) ? $config['db_user'] : $user;
     $password = empty($password) ? $config['db_pass'] : $password;
@@ -43,6 +58,7 @@ function dbConnect($host = null, $user = '', $password = '', $database = '', $po
     $socket = empty($socket) ? $config['db_socket'] : $socket;
 
     $database_link = mysqli_connect('p:' . $host, $user, $password, null, $port, $socket);
+    mysqli_options($database_link, MYSQLI_OPT_LOCAL_INFILE, false);
     if ($database_link === false) {
         $error = mysqli_connect_error();
         if ($error == 'No such file or directory') {
@@ -55,7 +71,7 @@ function dbConnect($host = null, $user = '', $password = '', $database = '', $po
     if (!$database_db) {
         $db_create_sql = "CREATE DATABASE " . $config['db_name'] . " CHARACTER SET utf8 COLLATE utf8_unicode_ci";
         mysqli_query($database_link, $db_create_sql);
-        $database_db = mysqli_select_db($database_link, $config['db_name']);
+        $database_db = mysqli_select_db($database_link, $database);
     }
 
     if (!$database_db) {
@@ -168,14 +184,17 @@ function dbBulkInsert($data, $table)
         $data  = $table;
         $table = $tmp;
     }
-    if (count($data) === 0) {
+    // check that data isn't an empty array
+    if (empty($data)) {
         return false;
     }
-    if (count($data[0]) === 0) {
+    // make sure we have fields to insert
+    $fields = array_keys(reset($data));
+    if (empty($fields)) {
         return false;
     }
 
-    $sql = 'INSERT INTO `'.$table.'` (`'.implode('`,`', array_keys($data[0])).'`)  VALUES ';
+    $sql = 'INSERT INTO `'.$table.'` (`'.implode('`,`', $fields).'`)  VALUES ';
     $values ='';
 
     foreach ($data as $row) {
