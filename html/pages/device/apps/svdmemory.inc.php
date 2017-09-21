@@ -3,7 +3,7 @@
 global $config;
 
 $graphs = array(
-    'svdisplayapp_mem'       => 'Memory',
+    'svdmemory_mem'       => 'Memory',
 );
 
 foreach ($graphs as $key => $text) {

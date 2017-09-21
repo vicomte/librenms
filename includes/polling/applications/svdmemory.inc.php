@@ -1,7 +1,7 @@
 <?php
 use LibreNMS\RRD\RrdDefinition;
 
-$name = 'svdisplayapp';
+$name = 'svdmemory';
 $app_id = $app['app_id'];
 $options = '-O qv';
 $mib = 'NET-SNMP-EXTEND-MIB';
@@ -14,14 +14,16 @@ $rrd_def = RrdDefinition::make()
 	->addDataset('mem', 'GAUGE');
 
 #$resp = snmp_walk($device, $oid, $options, $mib);
-$display_memory = snmp_get($device, $oid $options, $oid_bytes);
+$display_memory = snmp_get($device, $oid_bytes, $options, $mib);
+#snmp_get($device, "sysName.0", "-Oqv", "SNMPv2-MIB")
 #list($display_cpu, $display_memory) = explode("\n",$resp);
 
 $fields = array(
-	'display-app-mem' => (int)$display_memory,
+	'svdmemory-mem' => (int)$display_memory,
 );
 
 $tags = compact('name', 'app_id', 'rrd_name', 'rrd_def');
+error_log("SVDMemory: " . $display_memory);
 if ($display_memory > 2100000000) {
   $status = "ERROR"; 
 } else {
