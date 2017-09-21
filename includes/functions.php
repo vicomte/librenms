@@ -101,12 +101,16 @@ function getHostOS($device)
     $pattern = $config['install_dir'] . '/includes/definitions/*.yaml';
     foreach (glob($pattern) as $file) {
         $os = basename($file, '.yaml');
-        if (isset($config['os'][$os])) {
+        if (isset($config['os'][$os]['os'])) {
             $tmp = $config['os'][$os];
         } else {
             $tmp = Symfony\Component\Yaml\Yaml::parse(
                 file_get_contents($file)
             );
+            // pull in user overrides
+            if (isset($config['os'][$os])) {
+                $tmp = array_replace_recursive($tmp, $config['os'][$os]);
+            }
         }
         if (isset($tmp['discovery']) && is_array($tmp['discovery'])) {
             foreach ($tmp['discovery'] as $item) {
@@ -440,7 +444,7 @@ function addHost($host, $snmp_version = '', $port = '161', $transport = 'udp', $
         $snmpvers = array($snmp_version);
     }
 
-    $host_unreachable_exception = new HostUnreachableException("Could not connect, please check the snmp details and snmp reachability");
+    $host_unreachable_exception = new HostUnreachableException("Could not connect to $host, please check the snmp details and snmp reachability");
     // try different snmp variables to add the device
     foreach ($snmpvers as $snmpver) {
         if ($snmpver === "v3") {
