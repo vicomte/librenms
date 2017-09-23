@@ -1,12 +1,12 @@
 <?php
 use LibreNMS\RRD\RrdDefinition;
 
-$name = 'svdcrashes';
+$name = 'svdheartbeat';
 $app_id = $app['app_id'];
 
 $rrd_name = array('app', $name, $app_id);
 $rrd_def = RrdDefinition::make()
-	->addDataset('count', 'GAUGE');
+	->addDataset('missedbeat', 'GAUGE');
 
 $ip = gethostbyname($device["hostname"]);
 
@@ -17,12 +17,12 @@ if (strlen($mini_status) == 0) {
 } 
 $json_hash = json_decode($mini_status, true);
 #$test_val = 0;
-$test_val = (int)$json_hash["crashes"];
-error_log("SVDCrashes6hr:" . $test_val);
+$test_val = (int)$json_hash["missed_heartbeat"];
+error_log("SVDheartbeat:" . $test_val);
 $fields = array(
 #	'display-app-mem' => (int)$display_memory,
 #	'display-app-cpu' => (float)$display_cpu,
-	'svdcrashes-count' => $test_val,
+	'svdheartbeat-missedbeat' => $test_val,
 #	'display-app-double_disconnected_apps' => (int)$json_hash["double_disconnected_apps"],
 #	'display-app-missing_heartbeat' => $json_hash["missing_heartbeat"],
 #	'display-app-heartbeat_lags' => (int)$json_hash["missing_heartbeat"],
