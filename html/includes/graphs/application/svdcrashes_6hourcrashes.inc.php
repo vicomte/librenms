@@ -20,6 +20,6 @@ $colour_area_max = 'FFEE99';
 $graph_max  = 1;
 $multiplier = 1;
 
-$unit_text = 'bytes';
+$unit_text = 'count';
 
 require 'includes/graphs/generic_simplex.inc.php';

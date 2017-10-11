@@ -24,7 +24,7 @@ $fields = array(
 
 $tags = compact('name', 'app_id', 'rrd_name', 'rrd_def');
 error_log("SVDMemory: " . $display_memory);
-if ($display_memory > 2100000000) {
+if ($display_memory > 2750000000) {
   $status = "ERROR"; 
 } else {
   $status = "OK";

@@ -16,7 +16,6 @@ if (strlen($mini_status) == 0) {
 	$mini_status = "{\"crashes\":0,\"double_disconnected_apps\":0,\"missing_heartbeat\":true,\"display_heartbeat_lags\":false,\"display_app_dead_port\":false,\"slow_response\":0}";	
 } 
 $json_hash = json_decode($mini_status, true);
-#$test_val = 0;
 $test_val = (int)$json_hash["crashes"];
 error_log("SVDCrashes6hr:" . $test_val);
 $fields = array(
