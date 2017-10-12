@@ -18,12 +18,12 @@ if (strlen($mini_status) == 0) {
 $json_hash = json_decode($mini_status, true);
 
 $test_val = (int)$json_hash["missing_heartbeat"];
-error_log("SVDheartbeat:" . $test_val);
 $fields = array(
 	'svdheartbeat-missedbeat' => $test_val,
 );
 error_log(print_r($app));
 $tags = compact('name', 'app_id', 'rrd_name', 'rrd_def');
+error_log("SVDheartbeat:" . $test_val);
 if ($test_val > 0) {
   $status = "ERROR"; 
 } else {

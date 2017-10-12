@@ -1,5 +1,13 @@
 <?php
 
+$graphs['svdheartbeat']    = array(
+    'missedbeat',
+);
+
+$graphs['svdcrashes']    = array(
+    'count',
+);
+
 $graphs['svdmemory']    = array(
     'mem',
 );
