@@ -1,5 +1,19 @@
 <?php
 
+$graphs['svdmemory']    = array(
+    'mem',
+);
+
+
+$graphs['svdproc']    = array(
+    'cpu',
+);
+
+
+$graphs['svdmd']    = array(
+    'md',
+);
+
 $graphs['svdisplayapp']    = array(
     'mem',
     'cpu',

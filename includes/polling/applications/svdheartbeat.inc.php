@@ -16,19 +16,13 @@ if (strlen($mini_status) == 0) {
 	$mini_status = "{\"crashes\":0,\"double_disconnected_apps\":0,\"missing_heartbeat\":true,\"display_heartbeat_lags\":false,\"display_app_dead_port\":false,\"slow_response\":0}";	
 } 
 $json_hash = json_decode($mini_status, true);
-#$test_val = 0;
-$test_val = (int)$json_hash["missed_heartbeat"];
+
+$test_val = (int)$json_hash["missing_heartbeat"];
 error_log("SVDheartbeat:" . $test_val);
 $fields = array(
-#	'display-app-mem' => (int)$display_memory,
-#	'display-app-cpu' => (float)$display_cpu,
 	'svdheartbeat-missedbeat' => $test_val,
-#	'display-app-double_disconnected_apps' => (int)$json_hash["double_disconnected_apps"],
-#	'display-app-missing_heartbeat' => $json_hash["missing_heartbeat"],
-#	'display-app-heartbeat_lags' => (int)$json_hash["missing_heartbeat"],
-#	'display-app-dead_port' => (int)$json_hash["display_app_dead_port"]
 );
-
+error_log(print_r($app));
 $tags = compact('name', 'app_id', 'rrd_name', 'rrd_def');
 if ($test_val > 0) {
   $status = "ERROR"; 

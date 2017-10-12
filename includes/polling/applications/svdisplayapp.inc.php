@@ -37,7 +37,6 @@ error_log('!!device is ' . $ip);
 
 $mini_status = get_data('https://app.scorevision.com/api/system_monitoring?ip_addr=' . $ip);
 error_log("JSON: " . $mini_status);
-#{"crashes":0,"double_disconnected_apps":0,"missing_heartbeat":true,"display_heartbeat_lags":false,"display_app_dead_port":false,"slow_response":0}
 if (strlen($mini_status) == 0) {
 	error_log("setting default return, string was empty");
 	$mini_status = "{\"crashes\":0,\"double_disconnected_apps\":0,\"missing_heartbeat\":true,\"display_heartbeat_lags\":false,\"display_app_dead_port\":false,\"slow_response\":0}";	
