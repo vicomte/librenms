@@ -134,6 +134,8 @@ $graphs['fail2ban'] = array(
 
 $graphs['freeswitch'] = array(
     'peak',
+    'calls',
+    'channels',
     'callsIn',
     'callsOut',
 );
