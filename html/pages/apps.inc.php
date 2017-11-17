@@ -25,6 +25,7 @@ $graphs['svdmd']    = array(
 $graphs['svdisplayapp']    = array(
     'mem',
     'cpu',
+    'visible'
 );
 
 $graphs['apache']    = array(
