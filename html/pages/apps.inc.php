@@ -1,5 +1,9 @@
 <?php
 
+$graphs['svdport4552']    = array(
+    'dead_port',
+);
+
 $graphs['svdheartbeat']    = array(
     'missedbeat',
 );

@@ -14,7 +14,7 @@ $rrd_def = RrdDefinition::make()
 	->addDataset('md', 'GAUGE');
 
 $port_active = snmp_get($device, $oid_bytes, $options, $mib);
-error_log("JSON: " . $port_active);
+#error_log("MD: " . $port_active);
 
 $fields = array(
 	'svdmd-md' => (int)$port_active

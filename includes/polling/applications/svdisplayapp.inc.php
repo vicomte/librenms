@@ -13,7 +13,7 @@ $rrd_def = RrdDefinition::make()
 	->addDataset('mem', 'GAUGE')
 	->addDataset('cpu', 'GAUGE')
 	->addDataset('6hour_crashes', 'GAUGE')
-	->addDataset('double_disconnected_apps', 'GAUGE')
+	->addDataset('double_disconnected', 'GAUGE')
 	->addDataset('missing_heartbeat', 'GAUGE')
         ->addDataset('heartbeat_lags', 'GAUGE')
 	->addDataset('dead_port', 'GAUGE')
@@ -22,7 +22,7 @@ $rrd_def = RrdDefinition::make()
 $ip = gethostbyname($device["hostname"]);
 
 $mini_status = get_data('https://app.scorevision.com/api/system_monitoring?ip_addr=' . $ip);
-error_log("JSON: " . $mini_status);
+#error_log("JSON: " . $mini_status);
 if (strlen($mini_status) == 0) {
 	error_log("setting default return, string was empty");
 	$mini_status = "{\"crashes\":0,\"double_disconnected_apps\":0,\"missing_heartbeat\":true,\"display_heartbeat_lags\":false,\"display_app_dead_port\":false,\"slow_response\":0,\"display_visible\":0}";	
@@ -36,14 +36,14 @@ $fields = array(
 	'svdisplayapp-mem' => (int)$mem,
 	'svdisplayapp-cpu' => (float)$proc,
 	'svdisplayapp-6hour_crashes' => (int)$json_hash["crashes"],
-	'svdisplayapp-double_disconnected_apps' => (int)$json_hash["double_disconnected_apps"],
+	'svdisplayapp-double_disconnected' => (int)$json_hash["double_disconnected_apps"],
 	'svdisplayapp-missing_heartbeat' => (int)$json_hash["missing_heartbeat"],
 	'svdisplayapp-heartbeat_lags' => (int)$json_hash["display_heartbeat_lags"],
 	'svdisplayapp-dead_port' => (int)$json_hash["display_app_dead_port"],
 	'svdisplayapp-visible' => $json_hash["display_visible"] ? 1 : 0
 );
 
-error_log("ARY: " . print_r(array_values($fields)));
+#error_log("ARY: " . print_r(array_values($fields)));
 $tags = compact('name', 'app_id', 'rrd_name', 'rrd_def');
 if ($display_memory > 2100000000 || $display_cpu > .5) { # || (int)$json_hash["crashes"] > 0 || $json_hash["missing_heartbeat"]) {
   $status = "ERROR"; 

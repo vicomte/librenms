@@ -4,13 +4,13 @@ $scale_min = 0;
 
 require 'includes/graphs/common.inc.php';
 
-$apache_rrd = rrd_name($device['hostname'], array('app', 'svdisplayapp', $app['app_id']));
+$apache_rrd = rrd_name($device['hostname'], array('app', 'svdport4552', $app['app_id']));
 
 if (rrdtool_check_rrd_exists($apache_rrd)) {
     $rrd_filename = $apache_rrd;
 }
 
-$ds = 'double_disconnected';
+$ds = 'dead_port';
 
 $colour_area = 'CDEB8B';
 $colour_line = '006600';
@@ -20,6 +20,6 @@ $colour_area_max = 'FFEE99';
 $graph_max  = 1;
 $multiplier = 1;
 
-$unit_text = 'dbl disconnects';
+$unit_text = 'Port 4552';
 
 require 'includes/graphs/generic_simplex.inc.php';
