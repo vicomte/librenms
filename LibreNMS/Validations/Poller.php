@@ -25,11 +25,10 @@
 
 namespace LibreNMS\Validations;
 
-use LibreNMS\Interfaces\ValidationGroup;
 use LibreNMS\ValidationResult;
 use LibreNMS\Validator;
 
-class Poller implements ValidationGroup
+class Poller extends BaseValidation
 {
     /**
      * Validate this module.
@@ -39,6 +38,11 @@ class Poller implements ValidationGroup
      */
     public function validate(Validator $validator)
     {
+        if (!dbIsConnected()) {
+            $validator->warn("Could not check poller/discovery, db is not connected.");
+            return;
+        }
+
         if (dbFetchCell('SELECT COUNT(*) FROM `devices`') == 0) {
             $result = ValidationResult::warn("You have not added any devices yet.");
 
@@ -128,23 +132,16 @@ class Poller implements ValidationGroup
 
     private function checkLastDiscovered(Validator $validator)
     {
-        if (dbFetchCell('SELECT COUNT(*) FROM `devices` WHERE `last_discovered` IS NOT NULL') == 0) {
+        $incomplete_sql = "SELECT 1 FROM `devices` WHERE `last_discovered` <= DATE_ADD(NOW(), INTERVAL - 24 HOUR)
+                            AND `ignore` = 0 AND `disabled` = 0 AND `status` = 1 AND `snmp_disable` = 0";
+
+        if (!dbFetchCell('SELECT 1 FROM `devices` WHERE `last_discovered` IS NOT NULL')) {
             $validator->fail('Discovery has never run. Check the cron job');
-        } elseif (dbFetchCell("SELECT COUNT(*) FROM `devices` WHERE `last_discovered` <= DATE_ADD(NOW(), INTERVAL - 24 HOUR) AND `ignore` = 0 AND `disabled` = 0 AND `status` = 1") > 0) {
+        } elseif (dbFetchCell($incomplete_sql)) {
             $validator->fail(
                 "Discovery has not completed in the last 24 hours.",
                 "Check the cron job to make sure it is running and using discovery-wrapper.py"
             );
         }
-    }
-
-    /**
-     * Returns if this test should be run by default or not.
-     *
-     * @return bool
-     */
-    public function isDefault()
-    {
-        return true;
     }
 }

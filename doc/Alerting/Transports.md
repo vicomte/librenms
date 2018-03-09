@@ -2,7 +2,7 @@ source: Alerting/Transports.md
 
 # Transports
 
-Transports are located within `includes/alerts/transports.*.php` and defined as well as configured via ~~`$config['alert']['transports']['Example'] = 'Some Options'`~~.
+Transports are located within `LibreNMS/Alert/Transport/` and defined as well as configured via ~~`$config['alert']['transports']['Example'] = 'Some Options'`~~.
 
 Contacts will be gathered automatically and passed to the configured transports.
 By default the Contacts will be only gathered when the alert triggers and will ignore future changes in contacts for the incident. If you want contacts to be re-gathered before each dispatch, please set ~~`$config['alert']['fixed-contacts'] = false;`~~ in your config.php.
@@ -448,4 +448,14 @@ $config['alert']['transports']['jira']['username']  = 'myjirauser';
 $config['alert']['transports']['jira']['password'] = 'myjirapass';
 $config['alert']['transports']['jira']['prjkey'][]  = 'JIRAPROJECTKEY';
 $config['alert']['transports']['jira']['issuetype'][]  = 'Myissuetype';
+```
+
+## Gitlab
+
+LibreNMS will create issues for warning and critical level alerts however only title and description are set.  Uses Personal access tokens to authenticate with Gitlab and will store the token in cleartext.
+
+```php
+$config['alert']['transports']['gitlab']['host'] = 'http://gitlab.host.tld';
+$config['alert']['transports']['gitlab']['project_id'] = '1';
+$config['alert']['transports']['gitlab']['key'] = 'AbCdEf12345';
 ```
