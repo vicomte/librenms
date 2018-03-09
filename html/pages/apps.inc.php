@@ -142,15 +142,7 @@ $graphs['nfs-v3-stats'] = array(
 );
 
 $graphs['nfs-server'] = array(
-    'stats_v2',
-    'stats',
-    'stats_v4',
-    'v4ops',
     'io',
-    'fh',
-    'rc',
-    'ra',
-    'net',
     'net_tcp_conns',
     'rpc',
 );
@@ -169,6 +161,8 @@ $graphs['fail2ban'] = array(
 
 $graphs['freeswitch'] = array(
     'peak',
+    'calls',
+    'channels',
     'callsIn',
     'callsOut',
 );
@@ -304,8 +298,11 @@ $graphs['sdfsinfo'] = array(
 );
 
 $graphs['pi-hole'] = array(
-    'stats',
-    'queries',
+    'query_types',
+    'destinations',
+    'query_results',
+    'block_percent',
+    'blocklist',
 );
 
 print_optionbar_start();

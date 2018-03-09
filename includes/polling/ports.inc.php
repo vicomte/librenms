@@ -230,6 +230,10 @@ if ($device['os'] != 'asa') {
     $port_stats = snmpwalk_cache_oid($device, 'dot3StatsDuplexStatus', $port_stats, 'EtherLike-MIB');
 }
 
+if ($device['os'] == 'procera') {
+    require_once 'ports/procera.inc.php';
+}
+
 if ($config['enable_ports_adsl']) {
     $device['adsl_count'] = dbFetchCell("SELECT COUNT(*) FROM `ports` WHERE `device_id` = ? AND `ifType` = 'adsl'", array($device['device_id']));
 }
@@ -436,6 +440,10 @@ foreach ($ports as $port) {
         $port['update_extended'] = array();
         $port['state']  = array();
 
+        if ($port_association_mode != "ifIndex") {
+            $port['update']['ifIndex'] = $ifIndex;
+        }
+
         if ($config['slow_statistics'] == true) {
             $port['update']['poll_time']   = $polled;
             $port['update']['poll_prev']   = $port['poll_time'];
@@ -525,7 +533,13 @@ foreach ($ports as $port) {
         // FIXME use $q_bridge_mib[$this_port['ifIndex']] to see if it is a trunk (>1 array count)
         echo 'VLAN == '.$this_port['ifVlan'];
 
-    // When devices do not provide ifAlias data, populate with ifDescr data if configured
+        // When devices do not provide ifDescr data, populate with ifName data if available
+        if ($this_port['ifDescr'] == '' || $this_port['ifDescr'] == null) {
+            $this_port['ifDescr'] = $this_port['ifName'];
+            d_echo('Using ifName as ifDescr');
+        }
+
+        // When devices do not provide ifAlias data, populate with ifDescr data if configured
         if ($this_port['ifAlias'] == '' || $this_port['ifAlias'] == null) {
             $this_port['ifAlias'] = $this_port['ifDescr'];
             d_echo('Using ifDescr as ifAlias');
@@ -747,6 +761,7 @@ foreach ($ports as $port) {
 
         influx_update($device, 'ports', rrd_array_filter($tags), $fields);
         graphite_update($device, 'ports|' . $ifName, $tags, $fields);
+        opentsdb_update($device, 'port', array('ifName' => $this_port['ifName'], 'ifIndex' => getPortRrdName($port_id)), $fields);
 
         // End Update IF-MIB
         // Update PAgP

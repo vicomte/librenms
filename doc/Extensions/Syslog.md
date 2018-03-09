@@ -54,7 +54,7 @@ source s_net {
 # Destinations
 ########################
 destination d_librenms {
-        program("/opt/librenms/syslog.php" template ("$HOST||$FACILITY||$PRIORITY||$LEVEL||$TAG||$YEAR-$MONTH-$DAY $HOUR:$MIN:$SEC||$MSG||$PROGRAM\n") template-escape(yes));
+        program("/opt/librenms/syslog.php" template ("$HOST||$FACILITY||$PRIORITY||$LEVEL||$TAG||$R_YEAR-$R_MONTH-$R_DAY $R_HOUR:$R_MIN:$R_SEC||$MSG||$PROGRAM\n") template-escape(yes));
 };
 
 ########################
@@ -102,7 +102,7 @@ Create a file called something like `/etc/rsyslog.d/30-librenms.conf` containing
 # Feed syslog messages to librenms
 $ModLoad omprog
 
-$template librenms,"%fromhost%||%syslogfacility%||%syslogpriority%||%syslogseverity%||%syslogtag%||%$year%-%$month%-%$day% %timereported:8:25%||%msg%||%programname%\n"
+$template librenms,"%fromhost%||%syslogfacility%||%syslogpriority%||%syslogseverity%||%syslogtag%||%$year%-%$month%-%$day% %timegenerated:8:25%||%msg%||%programname%\n"
 
 *.* action(type="omprog" binary="/opt/librenms/syslog.php" template="librenms")
 
@@ -129,6 +129,13 @@ Add the following to your LibreNMS `config.php` file to enable the Syslog extens
 ```ssh
 $config['enable_syslog'] = 1;
 ```
+#### Syslog Clean Up 
+Can be set inside of  `config.php`
+```php
+$config['syslog_purge'] = 30;
+```
+The cleanup is run by daily.sh and any entries over X days old are automatically purged. Values are in days.
+See here for more Clean Up Options [Link](https://docs.librenms.org/#Support/Configuration/#cleanup-options)
 
 ### Client configuration
 
@@ -180,7 +187,12 @@ Trigger external scripts based on specific syslog patterns being matched with sy
 $config['enable_syslog_hooks'] = 1;
 ```
 
-The below are some example hooks to call an external script in the event of a configuration change on Cisco IOS, IOS-XR and NX-OS devices. Add to your `config.php` file to enable.
+The below are some example hooks to call an external script in the event of a configuration change on Cisco ASA, IOS, NX-OS and IOS-XR devices. Add to your `config.php` file to enable.
+
+#### Cisco ASA
+```ssh
+$config['os']['asa']['syslog_hook'][] = Array('regex' => '/%ASA-(config-)?5-111005/', 'script' => '/opt/librenms/scripts/syslog-notify-oxidized.php');
+```
 
 #### Cisco IOS
 ```ssh
