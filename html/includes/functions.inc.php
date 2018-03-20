@@ -1578,20 +1578,30 @@ function get_postgres_databases($device_id)
     return array();
 }
 
-// takes the device array and app_id
+/**
+ * Get all disks (disk serial numbers) from the collected
+ * rrd files.
+ *
+ * @param array $device device for which we get the rrd's
+ * @param int   $app_id application id on the device
+ * @return array list of disks
+ */
 function get_disks_with_smart($device, $app_id)
 {
-    $all_disks = get_disks($device['device_id']);
     $disks = array();
-    $all_disks_int = 0;
-    while (isset($all_disks[$all_disks_int])) {
-        $disk = $all_disks[$all_disks_int]['diskio_descr'];
-        $rrd_filename = rrd_name($device['hostname'], array('app', 'smart', $app_id, $disk));
-        if (rrdtool_check_rrd_exists($rrd_filename)) {
-            $disks[] = $disk;
+
+    $pattern = sprintf('%s/%s-%s-%s-*.rrd', get_rrd_dir($device['hostname']), 'app', 'smart', $app_id);
+
+    foreach (glob($pattern) as $rrd) {
+        $filename = basename($rrd, '.rrd');
+
+        list(,,, $disk) = explode("-", $filename);
+
+        if ($disk) {
+            array_push($disks, $disk);
         }
-        $all_disks_int++;
     }
+
     return $disks;
 }
 
@@ -1632,30 +1642,6 @@ function get_dashboards($user_id = null)
     }
 
     return $result;
-}
-
-/**
- * Generate javascript to fill in a select box from an ajax list
- *
- * @param string $list_type type of list look in html/includes/list/
- * @param string $selector jquery selector for the target select element
- * @param int $selected the id of the item to mark as selected
- * @return string the javascript (not including <script> tags)
- */
-function generate_fill_select_js($list_type, $selector, $selected = null)
-{
-    return '$(document).ready(function() {
-    $select = $("' . $selector . '")
-    $.getJSON(\'ajax_list.php?id=' . $list_type . '\', function(data){
-        $.each(data, function(index,item) {
-            if (item.id == "' . $selected . '") {
-                $select.append("<option value=" + item.id + " selected>" + item.value + "</option>");
-            } else {
-                $select.append("<option value=" + item.id + ">" + item.value + "</option>");
-            }
-        });
-    });
-});';
 }
 
 /**
