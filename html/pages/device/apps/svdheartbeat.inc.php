@@ -3,14 +3,7 @@
 global $config;
 
 $graphs = array(
-    'svdisplayapp_mem'       => 'Memory',
-    'svdisplayapp_cpu'       => 'CPU',
-    'svdisplayapp_visible'	=> 'Visible',
-    'svdisplayapp_missing-heartbeat' => 'Missed Heartbeats',
-    'svdisplayapp_heartbeat-lags' => 'Heartbeat Lags System',
-    'svdisplayapp_6hour-crashes' => 'Crashes last 6 hours',
-    'svdisplayapp_double-disconnected-apps' => 'Games where both Connection methods became disconnected',
-    'svdisplayapp_dead-port' => 'Port 4552 Offline',
+    'svdheartbeat-missedbeat'       => '6hr Count',
 );
 
 foreach ($graphs as $key => $text) {
