@@ -49,6 +49,34 @@ $no_refresh = true;
 </div>
 <!-- End API URL Modal -->
 
+<!-- Stride Modal -->
+<div class="modal fade" id="new-config-stride" role="dialog" aria-hidden="true" title="Create new config item">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <form role="form" class="new_config_form">
+                    <div class="form-group">
+                        <span class="message"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="stride_value">Stride API URL</label>
+                        <input type="text" class="form-control" name="stride_value" id="stride_value" placeholder="Enter the Stride API url">
+                    </div>
+                    <div class="form-group">
+                        <label for="stride_extra">Slack options (specify one per line key=value)</label>
+                        <textarea class="form-control" name="stride_extra" id="stride_extra" placeholder="Enter the config options"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="submit-stride">Add config</button>
+                <a href="#" class="btn" data-dismiss="modal">Cancel</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Stride Modal -->
+
 <!-- Slack Modal -->
 <div class="modal fade" id="new-config-slack" role="dialog" aria-hidden="true" title="Create new config item">
     <div class="modal-dialog">
@@ -555,6 +583,78 @@ foreach ($slack_urls as $slack_url) {
                         <div class="form-group has-feedback">
                             <div class="col-sm-offset-4 col-sm-4">
                                 <textarea class="form-control" name="global-config-textarea" id="upd_slack_extra" placeholder="Enter the config options" data-config_id="" data-type="slack"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#stride_transport_expand"><i class="fa fa-caret-down"></i> Stride transport</a> <button name="test-alert" id="test-alert" type="button" data-transport="stride" class="btn btn-primary btn-xs pull-right">Test transport</button>
+                </h4>
+            </div>
+            <div id="stride_transport_expand" class="panel-collapse collapse">
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-sm-8">
+                            <button class="btn btn-success btn-xs" type="button" name="new_config" id="new_config_item" data-toggle="modal" data-target="#new-config-stride">Add Stride URL</button>
+                        </div>
+                    </div>';
+                    $stride_urls = get_config_like_name('alert.transports.stride.%.url');
+foreach ($stride_urls as $stride_url) {
+    unset($upd_stride_extra);
+    $new_stride_extra = array();
+    $stride_extras    = get_config_like_name('alert.transports.stride.'.$stride_url['config_id'].'.%');
+    foreach ($stride_extras as $extra) {
+        $split_extra = explode('.', $extra['config_name']);
+        if ($split_extra[4] != 'url') {
+            $new_stride_extra[] = $split_extra[4].'='.$extra['config_value'];
+        }
+    }
+
+    $upd_stride_extra = implode(PHP_EOL, $new_stride_extra);
+    echo '<div id="'.$stride_url['config_id'].'">
+                        <div class="form-group has-feedback">
+                            <label for="stirde_url" class="col-sm-4 control-label">Slack URL </label>
+                            <div class="col-sm-4">
+                                <input id="slack_url" class="form-control" type="text" name="global-config-input" value="'.$stride_url['config_value'].'" data-config_id="'.$stride_url['config_id'].'">
+                                <span class="form-control-feedback">
+                                    <i class="fa" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                            <div class="col-sm-2">
+                                <button type="button" class="btn btn-danger del-stride-config" name="del-stride-call" data-config_id="'.$stride_url['config_id'].'"><i class="fa fa-minus"></i></button>
+                            </div>
+                        </div>
+                        <div class="form-group has-feedback">
+                            <div class="col-sm-offset-4 col-sm-4">
+                                <textarea class="form-control" name="global-config-textarea" id="upd_stride_extra" placeholder="Enter the config options" data-config_id="'.$stride_url['config_id'].'" data-type="stride">'.$upd_stride_extra.'</textarea>
+                                <span class="form-control-feedback">
+                                    <i class="fa" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>';
+}//end foreach
+
+                    echo '<div class="hide" id="stride_url_template">
+                        <div class="form-group has-feedback">
+                            <label for="slack_url" class="col-sm-4 control-label api-method">Stride URL </label>
+                            <div class="col-sm-4">
+                                <input id="stride_url" class="form-control" type="text" name="global-config-input" value="" data-config_id="">
+                                <span class="form-control-feedback">
+                                    <i class="fa" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                            <div class="col-sm-2">
+                                <button type="button" class="btn btn-danger del-stride-config" name="del-stride-call" data-config_id=""><i class="fa fa-minus"></i></button>
+                            </div>
+                        </div>
+                        <div class="form-group has-feedback">
+                            <div class="col-sm-offset-4 col-sm-4">
+                                <textarea class="form-control" name="global-config-textarea" id="upd_stride_extra" placeholder="Enter the config options" data-config_id="" data-type="stride"></textarea>
                             </div>
                         </div>
                     </div>
@@ -1633,6 +1733,42 @@ echo '
         });
     });// End Add API config
 
+    // Add Stride config
+    strideIndex = 0;
+    $("button#submit-stride").click(function(){
+        var config_value = $('#stride_value').val();
+        var config_extra = $('#stride_extra').val();
+        $.ajax({
+            type: "POST",
+            url: "ajax_form.php",
+            data: {type: "config-item", action: 'add-stride', config_group: "alerting", config_sub_group: "transports", config_extra: config_extra, config_value: config_value},
+            dataType: "json",
+            success: function(data){
+                if (data.status == 'ok') {
+                    slackIndex++;
+                    var $template = $('#stride_url_template'),
+                        $clone    = $template
+                            .clone()
+                            .removeClass('hide')
+                            .attr('id',data.config_id)
+                            .attr('stride-url-index', strideIndex)
+                            .insertBefore($template);
+                        $clone.find('[name="global-config-input"]').attr('data-config_id',data.config_id);
+                        $clone.find('[name="del-stride-call"]').attr('data-config_id',data.config_id);
+                        $clone.find('[name="global-config-input"]').attr('value', config_value);
+                        $clone.find('[name="global-config-textarea"]').val(config_extra);
+                        $clone.find('[name="global-config-textarea"]').attr('data-config_id',data.config_id);
+                    $("#new-config-stride").modal('hide');
+                } else {
+                    $("#message").html('<div class="alert alert-info">' + data.message + '</div>');
+                }
+            },
+            error: function(){
+                $("#message").html('<div class="alert alert-danger">Error creating config item</div>');
+            }
+        });
+    });// End Add Stride config
+
     // Add Slack config
     slackIndex = 0;
     $("button#submit-slack").click(function(){
@@ -1876,6 +2012,28 @@ echo '
             }
         });
     });// End delete api config
+
+    // Delete stride config
+    $(document).on('click', 'button[name="del-stride-call"]', function(event) {
+        var config_id = $(this).data('config_id');
+        $.ajax({
+            type: 'POST',
+            url: 'ajax_form.php',
+            data: {type: "config-item", action: 'remove-stride', config_id: config_id},
+            dataType: "json",
+            success: function (data) {
+                if (data.status == 'ok') {
+                    $("#"+config_id).remove();
+                } else {
+                    $("#message").html('<div class="alert alert-info">' + data.message + '</div>');
+                }
+            },
+            error: function () {
+                $("#message").html('<div class="alert alert-danger">An error occurred.</div>');
+            }
+        });
+    });
+    // End delete stride config
 
     // Delete slack config
     $(document).on('click', 'button[name="del-slack-call"]', function(event) {
