@@ -1,13 +1,15 @@
 source: Installation/Installation-CentOS-7-Nginx.md
 > NOTE: These instructions assume you are the **root** user.  If you are not, prepend `sudo` to the shell commands (the ones that aren't at `mysql>` prompts) or temporarily become a user with root privileges with `sudo -s` or `sudo -i`.
 
+**Please note the minimum supported PHP version is 5.6.4**
+
 ## Install Required Packages ##
 
     yum install epel-release
 
     rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
 
-    yum install cronie fping git ImageMagick jwhois mariadb mariadb-server mtr MySQL-python net-snmp net-snmp-utils nginx nmap php71w php71w-cli php71w-common php71w-curl php71w-fpm php71w-gd php71w-mcrypt php71w-mysql php71w-snmp php71w-xml php71w-zip python-memcached rrdtool
+    yum install composer cronie fping git ImageMagick jwhois mariadb mariadb-server mtr MySQL-python net-snmp net-snmp-utils nginx nmap php72w php72w-cli php72w-common php72w-curl php72w-fpm php72w-gd php72w-mysql php72w-process php72w-snmp php72w-xml php72w-zip python-memcached rrdtool
 
 #### Add librenms user
 
@@ -17,7 +19,7 @@ source: Installation/Installation-CentOS-7-Nginx.md
 #### Install LibreNMS
 
     cd /opt
-    git clone https://github.com/librenms/librenms.git librenms
+    composer create-project --no-dev --keep-vcs librenms/librenms librenms dev-master
 
 ## DB Server ##
 
@@ -68,7 +70,7 @@ user = nginx
 group = apache   ; keep group as apache
 
 ;listen = 127.0.0.1:9000
-listen = /var/run/php-fpm/php7.1-fpm.sock
+listen = /var/run/php-fpm/php7.2-fpm.sock
 
 listen.owner = nginx
 listen.group = nginx
@@ -103,7 +105,7 @@ server {
  location ~ \.php {
   include fastcgi.conf;
   fastcgi_split_path_info ^(.+\.php)(/.+)$;
-  fastcgi_pass unix:/var/run/php-fpm/php7.1-fpm.sock;
+  fastcgi_pass unix:/var/run/php-fpm/php7.2-fpm.sock;
  }
  location ~ /\.ht {
   deny all;
@@ -123,7 +125,7 @@ Install the policy tool for SELinux:
 
     yum install policycoreutils-python
 
-Configure the contexts needed by LibreNMS:
+##### Configure the contexts needed by LibreNMS:
 
     semanage fcontext -a -t httpd_sys_content_t '/opt/librenms/logs(/.*)?'
     semanage fcontext -a -t httpd_sys_rw_content_t '/opt/librenms/logs(/.*)?'
@@ -133,6 +135,28 @@ Configure the contexts needed by LibreNMS:
     restorecon -RFvv /opt/librenms/rrd/
     setsebool -P httpd_can_sendmail=1
     setsebool -P httpd_execmem 1
+
+##### Allow fping
+Create the file http_fping.tt with the following contents:
+```
+module http_fping 1.0;
+
+require {
+type httpd_t;
+class capability net_raw;
+class rawip_socket { getopt create setopt write read };
+}
+
+#============= httpd_t ==============
+allow httpd_t self:capability net_raw;
+allow httpd_t self:rawip_socket { getopt create setopt write read };
+```
+
+Then run these commands
+
+    checkmodule -M -m -o http_fping.mod http_fping.tt
+    semodule_package -o http_fping.pp -m http_fping.mod
+    semodule -i http_fping.pp
 
 #### Allow access through firewall
 
@@ -156,7 +180,7 @@ Edit the text which says `RANDOMSTRINGGOESHERE` and set your own community strin
 
 ### Cron job
 
-    cp /opt/librenms/librenms.nonroot.cron /etc/cron.d/librenms`
+    cp /opt/librenms/librenms.nonroot.cron /etc/cron.d/librenms
 
 #### Copy logrotate config
 
@@ -206,4 +230,4 @@ Now that you've installed LibreNMS, we'd suggest that you have a read of a few o
 
 We hope you enjoy using LibreNMS. If you do, it would be great if you would consider opting into the stats system we have, please see [this page](http://docs.librenms.org/General/Callback-Stats-and-Privacy/) on what it is and how to enable it.
 
-If you would like to help make LibreNMS better there are [many ways to help](http://docs.librenms.org/Support/FAQ/#what-can-i-do-to-help). You can also [back LibreNMS on Open Collective](https://t.libren.ms/donations). 
+If you would like to help make LibreNMS better there are [many ways to help](http://docs.librenms.org/Support/FAQ/#what-can-i-do-to-help). You can also [back LibreNMS on Open Collective](https://t.libren.ms/donations).
