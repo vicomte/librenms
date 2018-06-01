@@ -13,9 +13,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 /**
- * API Transport
+ * Stride API Transport
  * @author f0o <f0o@devilcode.org>
  * @copyright 2014 f0o, LibreNMS
+ * @author Marc Hassman <marc@scorevision.com>
+ * @copyright 2018 Marc Hassman, LibreNMS
  * @license GPL
  * @package LibreNMS
  * @subpackage Alerts
@@ -31,9 +33,26 @@ foreach( $opts as $tmp_api ) {
 		'version' => 1,
 		'type' => 'doc',
 		'content' => array(
+			array( 'type' => 'heading',
+				'attrs' => array(
+					'level' => 3
+					),
+				'content' => array(
+					array(
+						'type' => text,
+						'text' => $obj['title']
+					)
+				)
+			),
 			array(
 				'type' => 'paragraph',
 				'content' => array(
+					array(
+						'type' => 'emoji',
+						'attrs' => array(
+							'shortName' => ($obj['state'] == 0 ? ':green_heart:' : ':octagonal_sign:')
+						)
+					),
 					array(
 						'type' => 'text',
 						'text' => $stride_msg

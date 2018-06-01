@@ -15,13 +15,12 @@ foreach ($app_devices as $app_device) {
     echo '<div class="panel panel-default">
         <div class="panel-heading">
         <h3 class="panel-title">
-        '.generate_device_link($app_device, shorthost($app_device['hostname']), array('tab' => 'apps', 'app' => $vars['app'])).'
+        '.generate_device_link($app_device, $app_device['hostname'], array('tab' => 'apps', 'app' => $vars['app'])).'
         <div class="pull-right"><small class="muted">'.$app_device['app_instance'].' '.$app_device['app_status'].'</small></div>
         </h3>
         </div>
         <div class="panel-body">
         <div class="row">';
-
     foreach ($graphs[$vars['app']] as $graph_type) {
         $graph_array['type']      = empty($graph_type) ? 'application_'.$vars['app'] : 'application_'.$vars['app'].'_'.$graph_type;
         $graph_array['id']        = $app_device['app_id'];
