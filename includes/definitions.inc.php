@@ -518,6 +518,36 @@ $config['graph_types']['device']['sgos_average_requests']['section']  = 'network
 $config['graph_types']['device']['sgos_average_requests']['order']    = '0';
 $config['graph_types']['device']['sgos_average_requests']['descr']    = 'Average HTTP Requests';
 
+// Blue Coat SGOS
+// Client Connections
+$config['graph_types']['device']['bluecoat_http_client_connections']['section'] = 'network';
+$config['graph_types']['device']['bluecoat_http_client_connections']['order']    = '0';
+$config['graph_types']['device']['bluecoat_http_client_connections']['descr']    = 'HTTP Client Connections';
+// Server Connections
+$config['graph_types']['device']['bluecoat_http_server_connections']['section'] = 'network';
+$config['graph_types']['device']['bluecoat_http_server_connections']['order']    = '0';
+$config['graph_types']['device']['bluecoat_http_server_connections']['descr']    = 'HTTP Server Connections';
+
+// Client Connections Active
+$config['graph_types']['device']['bluecoat_http_client_connections_active']['section']  = 'network';
+$config['graph_types']['device']['bluecoat_http_client_connections_active']['order']    = '0';
+$config['graph_types']['device']['bluecoat_http_client_connections_active']['descr']    = 'HTTP Client Connections Active';
+// Server Connections Active
+$config['graph_types']['device']['bluecoat_http_server_connections_active']['section'] = 'network';
+$config['graph_types']['device']['bluecoat_http_server_connections_active']['order']    = '0';
+$config['graph_types']['device']['bluecoat_http_server_connections_active']['descr']    = 'HTTP Server Connections Active';
+
+// Client Connections Idle
+$config['graph_types']['device']['bluecoat_http_client_connections_idle']['section']  = 'network';
+$config['graph_types']['device']['bluecoat_http_client_connections_idle']['order']    = '0';
+$config['graph_types']['device']['bluecoat_http_client_connections_idle']['descr']    = 'HTTP Client Connections Idle';
+
+// Server Connections Idle
+$config['graph_types']['device']['bluecoat_http_server_connections_idle']['section']  = 'network';
+$config['graph_types']['device']['bluecoat_http_server_connections_idle']['order']    = '0';
+$config['graph_types']['device']['bluecoat_http_server_connections_idle']['descr']    = 'HTTP Server Connections Idle';
+
+
 //riverbed specific graphs
 $config['graph_types']['device']['riverbed_connections']['section'] = 'network';
 $config['graph_types']['device']['riverbed_connections']['order'] = 0;
@@ -614,26 +644,6 @@ $config['device_types'][$i]['icon'] = 'workstation.png';
 //
 $config['project_name_version'] = $config['project_name'];
 
-if (isset($config['rrdgraph_def_text'])) {
-    $config['rrdgraph_def_text'] = str_replace('  ', ' ', $config['rrdgraph_def_text']);
-    $config['rrd_opts_array']    = explode(' ', trim($config['rrdgraph_def_text']));
-}
-
-if (isset($config['cdp_autocreate'])) {
-    $config['dp_autocreate'] = $config['cdp_autocreate'];
-}
-
-if (!isset($config['mibdir'])) {
-    $config['mibdir'] = $config['install_dir'].'/mibs';
-}
-
-$config['mib_dir'] = $config['mibdir'];
-
-// If we're on SSL, let's properly detect it
-if (isset($_SERVER['HTTPS'])) {
-    $config['base_url'] = preg_replace('/^http:/', 'https:', $config['base_url']);
-}
-
 // Set some times needed by loads of scripts (it's dynamic, so we do it here!)
 $config['time']['now']      = time();
 $config['time']['now']     -= ($config['time']['now'] % 300);
@@ -673,24 +683,3 @@ $config['ipmi_unit']['Watts']     = 'power';
 $config['ipmi_unit']['Amps']      = 'current';
 $config['ipmi_unit']['percent']   = 'load';
 $config['ipmi_unit']['discrete']  = '';
-
-// Define some variables if they aren't set by user definition in config.php
-if (!isset($config['html_dir'])) {
-    $config['html_dir'] = $config['install_dir'].'/html';
-}
-
-if (!isset($config['rrd_dir'])) {
-    $config['rrd_dir'] = $config['install_dir'].'/rrd';
-}
-
-if (!isset($config['log_dir'])) {
-    $config['log_dir'] = $config['install_dir'].'/logs';
-}
-
-if (!isset($config['log_file'])) {
-    $config['log_file'] = $config['log_dir'].'/'.$config['project_id'].'.log';
-}
-
-if (!isset($config['plugin_dir'])) {
-    $config['plugin_dir'] = $config['html_dir'].'/plugins';
-}
