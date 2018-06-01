@@ -1,5 +1,9 @@
 <?php
 
+$grphs['svdmempressure']  = array(
+	'pressure',
+);
+
 $graphs['svdport4552']    = array(
     'dead_port',
 );
