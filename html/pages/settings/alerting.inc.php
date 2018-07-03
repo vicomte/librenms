@@ -617,9 +617,9 @@ foreach ($stride_urls as $stride_url) {
     $upd_stride_extra = implode(PHP_EOL, $new_stride_extra);
     echo '<div id="'.$stride_url['config_id'].'">
                         <div class="form-group has-feedback">
-                            <label for="stirde_url" class="col-sm-4 control-label">Slack URL </label>
+                            <label for="stride_url" class="col-sm-4 control-label">Slack URL </label>
                             <div class="col-sm-4">
-                                <input id="slack_url" class="form-control" type="text" name="global-config-input" value="'.$stride_url['config_value'].'" data-config_id="'.$stride_url['config_id'].'">
+                                <input id="stride_url" class="form-control" type="text" name="global-config-input" value="'.$stride_url['config_value'].'" data-config_id="'.$stride_url['config_id'].'">
                                 <span class="form-control-feedback">
                                     <i class="fa" aria-hidden="true"></i>
                                 </span>
