@@ -1,3 +1,4 @@
+<?php
 /* Copyright (C) 2014 Daniel Preussker <f0o@devilcode.org>
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +22,9 @@
  * @subpackage Alerts
  */
 
-namespace LibreNMS/Alert/Transport;
-use LibreNMS/Interfaces/Alert/Transport;
+namespace LibreNMS\Alert\Transport;
+
+use LibreNMS\Interfaces\Alert\Transport;
 
 class Stride implements Transport 
 {
@@ -55,7 +57,6 @@ class Stride implements Transport
             $ary_header = array('Content-Type: application/json');
             if (array_key_exists('bearer',$tmp_api)) {
 	        array_push($ary_header, 'Authorization: Bearer ' . $tmp_api['bearer']);
-    #    error_log("Have a bearer: " . $tmp_api['bearer']);
             }
             $curl = curl_init();
             curl_setopt($curl, CURLOPT_HTTPHEADER, $ary_header);
