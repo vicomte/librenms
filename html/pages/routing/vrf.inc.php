@@ -1,6 +1,8 @@
 <?php
 
-if ($_SESSION['userlevel'] >= '5') {
+use LibreNMS\Authentication\Auth;
+
+if (Auth::user()->hasGlobalRead()) {
     if (!isset($_GET['optb'])) {
         $_GET['optb'] = 'all';
     }
@@ -95,13 +97,14 @@ if ($_SESSION['userlevel'] >= '5') {
         $port_fields = 'port_id, ifvrf, device_id, ifDescr, ifAlias, ifName';
 
         foreach (dbFetchRows("SELECT $vrf_fields, $dev_fields FROM `vrfs` AS V, `devices` AS D WHERE D.device_id = V.device_id") as $vrf_device) {
-            if (empty($vrf_devices[$vrf_device['mplsVpnVrfRouteDistinguisher']])) {
-                $vrf_devices[$vrf_device['mplsVpnVrfRouteDistinguisher']][0] = $vrf_device;
+            if (empty($vrf_devices[$vrf_device['vrf_name']][$vrf_device['mplsVpnVrfRouteDistinguisher']])) {
+                $vrf_devices[$vrf_device['vrf_name']][$vrf_device['mplsVpnVrfRouteDistinguisher']][0] = $vrf_device;
             } else {
-                array_push($vrf_devices[$vrf_device['mplsVpnVrfRouteDistinguisher']], $vrf_device);
+                array_push($vrf_devices[$vrf_device['vrf_name']][$vrf_device['mplsVpnVrfRouteDistinguisher']], $vrf_device);
             }
         }
-
+        
+        unset($ports);
         foreach (dbFetchRows("SELECT $port_fields FROM `ports` WHERE ifVrf<>0") as $port) {
             if (empty($ports[$port['ifvrf']][$port['device_id']])) {
                 $ports[$port['ifvrf']][$port['device_id']][0] = $port;
@@ -112,7 +115,7 @@ if ($_SESSION['userlevel'] >= '5') {
 
         echo "<div style='margin: 5px;'><table border=0 cellspacing=0 cellpadding=5 width=100%>";
         $i = '1';
-        foreach (dbFetchRows('SELECT * FROM `vrfs` GROUP BY `mplsVpnVrfRouteDistinguisher`') as $vrf) {
+        foreach (dbFetchRows('SELECT `vrf_name`, `mplsVpnVrfRouteDistinguisher`, `mplsVpnVrfDescription` FROM `vrfs` GROUP BY `mplsVpnVrfRouteDistinguisher`, `mplsVpnVrfDescription`,`vrf_name`') as $vrf) {
             if (($i % 2)) {
                 $bg_colour = $config['list_colour']['even'];
             } else {
@@ -122,10 +125,9 @@ if ($_SESSION['userlevel'] >= '5') {
             echo "<tr valign=top bgcolor='$bg_colour'>";
             echo "<td width=240><a class=list-large href='routing/vrf/".$vrf['mplsVpnVrfRouteDistinguisher'].'/'.$_GET['optc']."/'>".$vrf['vrf_name'].'</a><br /><span class=box-desc>'.$vrf['mplsVpnVrfDescription'].'</span></td>';
             echo '<td width=100 class=box-desc>'.$vrf['mplsVpnVrfRouteDistinguisher'].'</td>';
-            // echo("<td width=200 class=box-desc>" . $vrf['mplsVpnVrfDescription'] . "</td>");
             echo '<td><table border=0 cellspacing=0 cellpadding=5 width=100%>';
             $x = 1;
-            foreach ($vrf_devices[$vrf['mplsVpnVrfRouteDistinguisher']] as $device) {
+            foreach ($vrf_devices[$vrf['vrf_name']][$vrf['mplsVpnVrfRouteDistinguisher']] as $device) {
                 if (($i % 2)) {
                     if (($x % 2)) {
                         $dev_colour = $config['list_colour']['even_alt'];

@@ -1,7 +1,9 @@
 <?php
 
+use LibreNMS\Authentication\Auth;
+
 if ($_POST['editing']) {
-    if ($_SESSION['userlevel'] > '7') {
+    if (Auth::user()->hasGlobalAdmin()) {
         $poller_group = isset($_POST['poller_group']) ? clean($_POST['poller_group']) : 0;
         $snmp_enabled = ($_POST['snmp'] == 'on');
         if ($snmp_enabled) {
@@ -238,13 +240,13 @@ echo "        </select>
     <div class='form-group'>
     <label for='authname' class='col-sm-2 control-label'>Auth User Name</label>
     <div class='col-sm-4'>
-    <input type='text' id='authname' name='authname' class='form-control' value='".$device['authname']."'>
+    <input type='text' id='authname' name='authname' class='form-control' value='".$device['authname']."' autocomplete='off'>
     </div>
     </div>
     <div class='form-group'>
     <label for='authpass' class='col-sm-2 control-label'>Auth Password</label>
     <div class='col-sm-4'>
-    <input type='password' id='authpass' name='authpass' class='form-control' value='".$device['authpass']."'>
+    <input type='password' id='authpass' name='authpass' class='form-control' value='".$device['authpass']."' autocomplete='off'>
     </div>
     </div>
     <div class='form-group'>
@@ -259,7 +261,7 @@ echo "        </select>
     <div class='form-group'>
     <label for='cryptopass' class='col-sm-2 control-label'>Crypto Password</label>
     <div class='col-sm-4'>
-    <input type='password' id='cryptopass' name='cryptopass' class='form-control' value='".$device['cryptopass']."'>
+    <input type='password' id='cryptopass' name='cryptopass' class='form-control' value='".$device['cryptopass']."' autocomplete='off'>
     </div>
     </div>
     <div class='form-group'>

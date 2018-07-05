@@ -16,6 +16,7 @@
  * the source code distribution for details.
  */
 
+use LibreNMS\Authentication\Auth;
 use LibreNMS\Config;
 use LibreNMS\Exceptions\InvalidIpException;
 use LibreNMS\Util\IP;
@@ -365,7 +366,7 @@ function device_by_id_cache($device_id, $refresh = false)
     if (!$refresh && isset($cache['devices']['id'][$device_id]) && is_array($cache['devices']['id'][$device_id])) {
         $device = $cache['devices']['id'][$device_id];
     } else {
-        $device = dbFetchRow("SELECT * FROM `devices` WHERE `device_id` = ?", array($device_id));
+        $device = dbFetchRow("SELECT `devices`.*, `lat`, `lng` FROM `devices` LEFT JOIN locations ON `devices`.`location`=`locations`.`location` WHERE `device_id` = ?", array($device_id));
         $device['attribs'] = get_dev_attribs($device['device_id']);
         load_os($device);
 
@@ -1187,23 +1188,30 @@ function inet6_ntop($ip)
 
 /**
  * If hostname is an ip, use return sysName
- * @param array $device
+ * @param array $device (uses hostname and sysName fields)
  * @param string $hostname
  * @return string
-**/
-function format_hostname($device, $hostname = '')
+ */
+function format_hostname($device, $hostname = null)
 {
-    global $config;
     if (empty($hostname)) {
         $hostname = $device['hostname'];
     }
-    if ($config['force_ip_to_sysname'] === true && !empty($device['sysName'])) {
-        if (filter_var($hostname, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) == true || filter_var($hostname, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) == true) {
-            $hostname = $device['sysName'];
+
+    if (Config::get('force_hostname_to_sysname') && !empty($device['sysName'])) {
+        if (is_valid_hostname($hostname) && !IP::isValid($hostname)) {
+            return $device['sysName'];
         }
     }
+
+    if (Config::get('force_ip_to_sysname') && !empty($device['sysName'])) {
+        if (IP::isValid($hostname)) {
+            return $device['sysName'];
+        }
+    }
+
     return $hostname;
-}//end format_hostname
+}
 
 /**
  * Return valid port association modes
@@ -1463,29 +1471,6 @@ if (!function_exists('starts_with')) {
         }
         return false;
     }
-}
-
-function get_auth_ad_user_filter($username)
-{
-    global $config;
-
-    // don't return disabled users
-    $user_filter = "(&(samaccountname=$username)(!(useraccountcontrol:1.2.840.113556.1.4.803:=2))";
-    if ($config['auth_ad_user_filter']) {
-        $user_filter .= $config['auth_ad_user_filter'];
-    }
-    $user_filter .= ')';
-    return $user_filter;
-}
-
-function get_auth_ad_group_filter($groupname)
-{
-    global $config;
-    $group_filter = "(samaccountname=$groupname)";
-    if ($config['auth_ad_group_filter']) {
-        $group_filter = "(&{$config['auth_ad_group_filter']}$group_filter)";
-    }
-    return $group_filter;
 }
 
 /**
@@ -1766,7 +1751,7 @@ function get_user_pref($name, $default = null, $user_id = null)
     }
 
     if (is_null($user_id)) {
-        $user_id = $_SESSION['user_id'];
+        $user_id = Auth::id();
     }
 
     $pref = dbFetchCell(
@@ -1795,7 +1780,7 @@ function set_user_pref($name, $value, $user_id = null)
 {
     global $user_prefs;
     if (is_null($user_id)) {
-        $user_id = $_SESSION['user_id'];
+        $user_id = Auth::id();
     }
 
     $pref = array(

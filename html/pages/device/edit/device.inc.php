@@ -1,10 +1,13 @@
 <?php
+
+use LibreNMS\Authentication\Auth;
+
 if ($_POST['editing']) {
-    if ($_SESSION['userlevel'] > "7") {
+    if (Auth::user()->hasGlobalAdmin()) {
         $updated = 0;
 
         if (isset($_POST['parent_id'])) {
-            $parent_id = $_POST['parent_id'];
+            $parent_id = array_diff((array)$_POST['parent_id'], ['0']);
             $res = dbDelete('device_relationships', '`child_device_id` = ?', array($device['device_id']));
             if (!in_array('0', $pr)) {
                 foreach ($parent_id as $pr) {
@@ -61,7 +64,7 @@ if ($_POST['editing']) {
             $update_message = "Device record update error.";
         }
         if (isset($_POST['hostname']) && $_POST['hostname'] !== '' && $_POST['hostname'] !== $device['hostname']) {
-            if (is_admin()) {
+            if (Auth::user()->hasGlobalAdmin()) {
                 $result = renamehost($device['device_id'], $_POST['hostname'], 'webui');
                 if ($result == "") {
                     print_message("Hostname updated from {$device['hostname']} to {$_POST['hostname']}");
