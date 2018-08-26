@@ -1,5 +1,14 @@
 <?php
 $pagetitle[] = 'Apps';
+$graphs['svdport4552']    = array(
+    'dead_port',
+);
+$grphs['users']  = array(
+        'logins',
+);
+$grphs['svdmempressure']  = array(
+        'pressure',
+);
 $graphs['apache']    = array(
     'bits',
     'hits',

@@ -62,6 +62,7 @@ if (Auth::user()->hasGlobalAdmin()) {
                                     <option value="pushover-form">Pushover</option>
                                     <option value="rocket-form">Rocket.chat</option>
                                     <option value="slack-form">Slack</option>
+                                    <option value="stride-form">Stride</option>
                                     <option value="smseagle-form">SMSEagle</option>
                                     <option value="smsfeedback-form">SMSFeedback</option>
                                     <option value="syslog-form">Syslog</option>

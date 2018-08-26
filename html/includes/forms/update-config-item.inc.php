@@ -35,6 +35,8 @@ if (!is_numeric($config_id)) {
         if (!empty($k) || !empty($v)) {
             if ($config_type == 'slack') {
                 $db_id[] = dbInsert(array('config_name' => 'alert.transports.slack.'.$config_id.'.'.$k, 'config_value' => $v, 'config_group' => 'alerting', 'config_sub_group' => 'transports', 'config_default' => $v, 'config_descr' => 'Slack Transport'), 'config');
+            } elseif ($config_type == 'stride') {
+                $db_id[] = dbInsert(array('config_name' => 'alert.transports.stride.'.$config_id.'.'.$k, 'config_value' => $v, 'config_group' => 'alerting', 'config_sub_group' => 'transports', 'config_default' => $v, 'config_descr' => 'Stride Transport'), 'config');
             } elseif ($config_type == 'rocket') {
                 $db_id[] = dbInsert(array('config_name' => 'alert.transports.rocket.'.$config_id.'.'.$k, 'config_value' => $v, 'config_group' => 'alerting', 'config_sub_group' => 'transports', 'config_default' => $v, 'config_descr' => 'Rocket.Chat Transport'), 'config');
             } elseif ($config_type == 'hipchat') {
@@ -64,6 +66,8 @@ if (!is_numeric($config_id)) {
 
         if ($config_type == 'slack') {
             dbDelete('config', "(`config_name` LIKE 'alert.transports.slack.$config_id.%' AND `config_name` != 'alert.transports.slack.$config_id.url' AND `config_id` NOT IN ($db_inserts))");
+        } elseif ($config_type == 'stride') {
+            dbDelete('config', "(`config_name` LIKE 'alert.transports.stride.$config_id.%' AND `config_name` != 'alert.transports.stride.$config_id.url' AND `config_id` NOT IN ($db_inserts))");
         } elseif ($config_type == 'rocket') {
             dbDelete('config', "(`config_name` LIKE 'alert.transports.rocket.$config_id.%' AND `config_name` != 'alert.transports.rocket.$config_id.url' AND `config_id` NOT IN ($db_inserts))");
         } elseif ($config_type == 'hipchat') {
