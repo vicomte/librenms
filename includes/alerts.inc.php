@@ -214,7 +214,10 @@ function RunRules($device_id)
                 // NOCHG here doesn't mean no change full stop. It means no change to the alert state
                 // So we update the details column with any fresh changes to the alert output we might have.
                 $alert_log           = dbFetchRow('SELECT alert_log.id, alert_log.details FROM alert_log,alert_rules WHERE alert_log.rule_id = alert_rules.id && alert_log.device_id = ? && alert_log.rule_id = ? && alert_rules.disabled = 0 ORDER BY alert_log.id DESC LIMIT 1', array($device_id, $rule['id']));
-                $details             = json_decode(gzuncompress($alert_log['details']), true);
+                $details             = [];
+                if (!empty($alert_log['details'])) {
+                    $details = json_decode(gzuncompress($alert_log['details']), true);
+                }
                 $details['contacts'] = GetContacts($qry);
                 $details['rule']     = $qry;
                 $details             = gzcompress(json_encode($details), 9);
@@ -478,7 +481,10 @@ function DescribeAlert($alert)
             return false;
         }
 
-        $extra = json_decode(gzuncompress($id['details']), true);
+        $extra = [];
+        if (!empty($id['details'])) {
+            $extra = json_decode(gzuncompress($id['details']), true);
+        }
 
         // Reset count to 0 so alerts will continue
         $extra['count'] = 0;
@@ -600,9 +606,7 @@ function IssueAlert($alert)
     $obj = DescribeAlert($alert);
     if (is_array($obj)) {
         echo 'Issuing Alert-UID #'.$alert['id'].'/'.$alert['state'].': ';
-        if (!empty($config['alert']['transports'])) {
-            ExtTransports($obj);
-        }
+        ExtTransports($obj);
 
         echo "\r\n";
     }
@@ -688,7 +692,10 @@ function loadAlerts($where)
         } else {
             $alert['alert_id'] = $alert_status['id'];
             $alert['state'] = $alert_status['state'];
-            $alert['details'] = json_decode(gzuncompress($alert['details']), true);
+            $alert['note'] = $alert_status['note'];
+            if (!empty($alert['details'])) {
+                $alert['details'] = json_decode(gzuncompress($alert['details']), true);
+            }
             $alerts[] = $alert;
         }
     }
