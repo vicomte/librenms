@@ -25,4 +25,5 @@ if ($display_memory > 2) {
   $status = "OK";
 }
 update_application($app, $resp, $fields, $status);
+
 data_update($device, $name, $tags, $fields);

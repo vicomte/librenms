@@ -12,9 +12,9 @@
  * the source code distribution for details.
  */
 
-use LibreNMS\Authentication\Auth;
+use LibreNMS\Authentication\LegacyAuth;
 
-if (!Auth::user()->hasGlobalAdmin()) {
+if (!LegacyAuth::user()->hasGlobalAdmin()) {
     header('Content-type: text/plain');
     die('ERROR: You need to be admin');
 }
@@ -66,6 +66,7 @@ if (!is_numeric($config_id)) {
         $placeholders = dbGenPlaceholders(count($db_id));
 
         if ($config_type == 'slack') {
+
             dbDelete('config', "(`config_name` LIKE 'alert.transports.slack.$config_id.%' AND `config_name` != 'alert.transports.slack.$config_id.url' AND `config_id` NOT IN $placeholders)", $db_id);
         } elseif ($config_type == 'stride') {
             dbDelete('config', "(`config_name` LIKE 'alert.transports.stride.$config_id.%' AND `config_name` != 'alert.transports.stride.$config_id.url' AND `config_id` NOT IN ($placeholders)", $db_id);

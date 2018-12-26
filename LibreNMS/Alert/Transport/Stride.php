@@ -24,27 +24,19 @@
 
 namespace LibreNMS\Alert\Transport;
 
-use LibreNMS\Alert\Transport;
+use LibreNMS\Interfaces\Alert\Transport;
 
-class Stride extends Transport 
+class Stride implements Transport 
 {
     public function deliverAlert($obj, $opts)
     {
-        $stride_opts['url'] = $this->config['stride-url'];
-        foreach (explode(PHP_EOL, $this->config['options']) as $option) {
-            list($k,$v) = explode('=', $option);
-            $stride_opts[$k] = $v;
-        }
-        return $this->deliverAlertOld($obj, $stride_opts);
-    }
-
-
-    public function deliverAlertOld($obj, $opts)
-    {
+  
         foreach( $opts as $tmp_api ) 
 	{
+		error_log("msg: " . print_r($obj));
 		$xml = simplexml_load_string($obj['msg']);
-		$host = $opts['url'];
+		$host = $tmp_api['url'];
+
 		$pType = ($obj['state'] == 0 ? 'success' : 'error');
 		$data = $this->makeAry();
 		$data['body']['content'][0]['attrs']['panelType'] = $pType;
@@ -72,7 +64,9 @@ class Stride extends Transport
 					'text' => $hostString
 				);
 			}
-			if ($xml->faults !== false && sizeOf($xml->faults) > 0) {
+
+			if ($xml->faults !== false) {
+
 				foreach($xml->faults->fault as $fault) {
 					$data['body']['content'][0]['content'][0]['content'][] = array(
 						'type' => 'hardBreak'
@@ -111,12 +105,11 @@ class Stride extends Transport
 		}
 		$alert_message = json_encode($data);
 		$ary_header = array('Content-Type: application/json');
-   	        if (array_key_exists('bearer',$opts)) 
+
+   	        if (array_key_exists('bearer',$tmp_api)) 
 		{
-			array_push($ary_header, 'Authorization: Bearer ' . $opts['bearer']);
-            	} else {
-		 	print "NO BEARER!";
-		}
+			array_push($ary_header, 'Authorization: Bearer ' . $tmp_api['bearer']);
+            	}
 	   	$curl = curl_init();
        		curl_setopt($curl, CURLOPT_HTTPHEADER, $ary_header);
 	       	set_curl_proxy($curl);
@@ -182,28 +175,5 @@ class Stride extends Transport
 			);
 		return $data;
 	}
-    public static function configTemplate()
-    {
-        return [
-            'config' => [
-                [
-                    'title' => 'Webhook URL',
-                    'name' => 'stride-url',
-                    'descr' => 'Stride Webhook URL',
-                    'type' => 'text',
-                ],
-                [
-                    'title' => 'Stride Options',
-                    'name' => 'stride-options',
-                    'descr' => 'Stride Options',
-                    'type' => 'textarea',
-                ]
-            ],
-            'validation' => [
-                'stride-url' => 'required|url',
-                'stride-options' => 'optional|text',
-            ]
-        ];
-    }
 
 }
