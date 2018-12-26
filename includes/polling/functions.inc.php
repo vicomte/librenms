@@ -10,7 +10,6 @@ use LibreNMS\Exceptions\JsonAppMissingKeysException;
 use LibreNMS\Exceptions\JsonAppWrongVersionException;
 use LibreNMS\Exceptions\JsonAppExtendErroredException;
 
-
 function get_data($url) {
         $ch = curl_init();
         $timeout = 5;

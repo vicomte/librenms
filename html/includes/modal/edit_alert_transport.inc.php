@@ -39,6 +39,7 @@ if (LegacyAuth::user()->hasGlobalAdmin()) {
                             <label for='transport-choice' class='col-sm-3 col-md-2 control-label'>Transport type: </label>
                             <div class="col-sm-3">
                                 <select name='transport-choice' id='transport-choice' class='form-control'>
+
 <?php
 
 // Create list of transport
@@ -55,6 +56,7 @@ foreach ($transports_list as $transport) {
     echo '<option value="'.strtolower($transport).'-form">'.$transport.'</option>';
 }
 ?>
+
                                 </select>
                             </div>
                         </div>

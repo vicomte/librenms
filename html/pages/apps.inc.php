@@ -1,6 +1,5 @@
 <?php
 $pagetitle[] = 'Apps';
-<<<<<<< HEAD
 
 $grphs['svdmempressure']  = array(
 	'pressure',
@@ -64,8 +63,7 @@ $graphs['svdisplayapp']    = array(
     'visible'
 );
 
-=======
->>>>>>> upstream/master
+
 $graphs['apache']    = array(
     'bits',
     'hits',

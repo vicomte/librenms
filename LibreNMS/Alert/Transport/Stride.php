@@ -36,6 +36,7 @@ class Stride implements Transport
 		error_log("msg: " . print_r($obj));
 		$xml = simplexml_load_string($obj['msg']);
 		$host = $tmp_api['url'];
+
 		$pType = ($obj['state'] == 0 ? 'success' : 'error');
 		$data = $this->makeAry();
 		$data['body']['content'][0]['attrs']['panelType'] = $pType;
@@ -63,7 +64,9 @@ class Stride implements Transport
 					'text' => $hostString
 				);
 			}
+
 			if ($xml->faults !== false) {
+
 				foreach($xml->faults->fault as $fault) {
 					$data['body']['content'][0]['content'][0]['content'][] = array(
 						'type' => 'hardBreak'
@@ -102,6 +105,7 @@ class Stride implements Transport
 		}
 		$alert_message = json_encode($data);
 		$ary_header = array('Content-Type: application/json');
+
    	        if (array_key_exists('bearer',$tmp_api)) 
 		{
 			array_push($ary_header, 'Authorization: Bearer ' . $tmp_api['bearer']);
@@ -171,4 +175,5 @@ class Stride implements Transport
 			);
 		return $data;
 	}
+
 }

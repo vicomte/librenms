@@ -28,11 +28,12 @@ $fields = array(
 #	'display-app-dead_port' => (int)$json_hash["display_app_dead_port"]
 );
 
+$fields = array('dead_port' => $test_val,);
 $tags = compact('name', 'app_id', 'rrd_name', 'rrd_def');
 if ($test_val > 0) {
   $status = "ERROR"; 
 } else {
   $status = "OK";
 }
-update_application($app, $resp, $status);
+update_application($app, $mini_status, $fields, $status);
 data_update($device, $name, $tags, $fields);
