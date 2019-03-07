@@ -24,6 +24,30 @@ To include users that have `Global-Read`, `Administrator` or `Normal-User` permi
 ## Using a Proxy?
 [Proxy Configuration](../Support/Configuration.md#proxy-support)
 
+## Using a AMQP based Transport?
+
+You need to install an additional php module : `bcmath` (eg `php72w-bcmath` for
+Centos 7)
+
+## Alertmanager
+Alertmanager is an alert handling software, initially developed for alert processing sent by Prometheus. 
+
+It has built-in functionality for deduplicating, grouping and routing alerts based on configurable criteria. 
+
+LibreNMS uses alert grouping by alert rule, which can produce an array of alerts of similar content for an array of hosts, whereas Alertmanager can group them by alert meta, ideally producing one single notice in case an issue occurs. 
+
+It is possible to configure as much label values as required in Alertmanager Options section. Every label and it's value should be entered as a new line.
+
+[Alertmanager Docs](https://prometheus.io/docs/alerting/alertmanager/)
+
+**Example:**
+
+| Config | Example |
+| ------ | ------- |
+| Alertmanager URL      | http://alertmanager.example.com |
+| Alertmanager Options: | source=librenms |
+| | customlabel=value |
+
 ## API
 API transports definitions are a bit more complex than the E-Mail configuration.
 
@@ -56,7 +80,7 @@ Copy your access token from the Boxcar app or from the Boxcar.io website and set
 ## Canopsis
 Canopsis is a hypervision tool. LibreNMS can send alerts to Canopsis which are then converted to canopsis events. 
 
-[Canopsis Docs](http://www.canopsis.org/wp-content/themes/canopsis/doc/sakura/user-guide/event-spec.html)
+[Canopsis Docs](https://doc.canopsis.net/guide-developpement/struct-event/)
 
 **Example:**
 
