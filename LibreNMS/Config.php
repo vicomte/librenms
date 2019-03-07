@@ -27,6 +27,7 @@ namespace LibreNMS;
 
 use App\Models\GraphType;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Arr;
 use LibreNMS\DB\Eloquent;
 
 class Config
@@ -128,6 +129,18 @@ class Config
         }
 
         return $curr;
+    }
+
+    /**
+     * Unset a config setting
+     * or multiple
+     *
+     * @param string|array $key
+     */
+    public static function forget($key)
+    {
+        global $config;
+        Arr::forget($config, $key);
     }
 
     /**
@@ -522,12 +535,15 @@ class Config
         // Check for testing database
         if (getenv('DBTEST')) {
             if (isset($config['test_db_name'])) {
+                putenv('DB_DATABASE=' . $config['test_db_name']);
                 $config['db_name'] = $config['test_db_name'];
             }
             if (isset($config['test_db_user'])) {
+                putenv('DB_USERNAME=' . $config['test_db_user']);
                 $config['db_user'] = $config['test_db_user'];
             }
             if (isset($config['test_db_pass'])) {
+                putenv('DB_PASSWORD=' . $config['test_db_pass']);
                 $config['db_pass'] = $config['test_db_pass'];
             }
         }

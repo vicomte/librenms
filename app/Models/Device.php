@@ -7,10 +7,12 @@ use Fico7489\Laravel\Pivot\Traits\PivotEventTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Str;
 use LibreNMS\Exceptions\InvalidIpException;
 use LibreNMS\Util\IP;
 use LibreNMS\Util\IPv4;
 use LibreNMS\Util\IPv6;
+use LibreNMS\Util\Url;
 
 class Device extends BaseModel
 {
@@ -149,6 +151,58 @@ class Device extends BaseModel
         }
 
         return $this->hostname;
+    }
+
+    public function name()
+    {
+        $displayName = $this->displayName();
+        if ($this->sysName !== $displayName) {
+            return $this->sysName;
+        } elseif ($this->hostname !== $displayName && $this->hostname !== $this->ip) {
+            return $this->hostname;
+        }
+
+        return '';
+    }
+
+    public function isUnderMaintenance()
+    {
+        $query = AlertSchedule::isActive()
+            ->join('alert_schedulables', 'alert_schedule.schedule_id', 'alert_schedulables.schedule_id')
+            ->where(function ($query) {
+                $query->where(function ($query) {
+                    $query->where('alert_schedulable_type', 'device')
+                        ->where('alert_schedulable_id', $this->device_id);
+                });
+
+                if ($this->groups) {
+                    $query->orWhere(function ($query) {
+                        $query->where('alert_schedulable_type', 'device_group')
+                            ->whereIn('alert_schedulable_id', $this->groups->pluck('id'));
+                    });
+                }
+            });
+
+        return $query->exists();
+    }
+
+    public function loadOs($force = false)
+    {
+        global $config;
+
+        $yaml_file = base_path('/includes/definitions/' . $this->os . '.yaml');
+
+        if ((empty($config['os'][$this->os]['definition_loaded']) || $force) && file_exists($yaml_file)) {
+            $os = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($yaml_file));
+
+            if (isset($config['os'][$this->os])) {
+                $config['os'][$this->os] = array_replace_recursive($os, $config['os'][$this->os]);
+            } else {
+                $config['os'][$this->os] = $os;
+            }
+
+            $config['os'][$this->os]['definition_loaded'] = true;
+        }
     }
 
     /**
@@ -335,11 +389,10 @@ class Device extends BaseModel
 
     public function getIconAttribute($icon)
     {
-        if (isset($icon)) {
-            return "images/os/$icon";
-        }
-        return 'images/os/generic.svg';
+        $this->loadOs();
+        return Str::start(Url::findOsImage($this->os, $this->features, $icon), 'images/os/');
     }
+
     public function getIpAttribute($ip)
     {
         if (empty($ip)) {
@@ -434,6 +487,11 @@ class Device extends BaseModel
         return $this->hasMany('App\Models\Alert', 'device_id');
     }
 
+    public function alertSchedules()
+    {
+        return $this->morphToMany('App\Models\AlertSchedule', 'alert_schedulable', 'alert_schedulables', 'schedule_id', 'schedule_id');
+    }
+
     public function applications()
     {
         return $this->hasMany('App\Models\Application', 'device_id');
@@ -461,7 +519,7 @@ class Device extends BaseModel
 
     public function eventlogs()
     {
-        return $this->hasMany('App\Models\General\Eventlog', 'host', 'device_id');
+        return $this->hasMany('App\Models\Eventlog', 'device_id', 'device_id');
     }
 
     public function groups()
@@ -548,5 +606,10 @@ class Device extends BaseModel
     public function vrfs()
     {
         return $this->hasMany('App\Models\Vrf', 'device_id');
+    }
+
+    public function wirelessSensors()
+    {
+        return $this->hasMany('App\Models\WirelessSensor', 'device_id');
     }
 }
