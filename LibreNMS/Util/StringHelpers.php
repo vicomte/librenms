@@ -76,6 +76,16 @@ class StringHelpers
             'zfs' => 'ZFS',
         ];
 
-        return isset($replacements[$string]) ? $replacements[$string] : ucfirst($string);
+        return isset($replacements[$string]) ? $replacements[$string] : ucwords(str_replace(['_', '-'], ' ', $string));
+    }
+
+    /**
+     * Convert a camel or studly case string to Title case (with spaces)
+     * @param $string
+     * @return string
+     */
+    public static function camelToTitle($string)
+    {
+        return ucwords(implode(' ', preg_split('/(?=[A-Z])/', $string)));
     }
 }

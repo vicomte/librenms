@@ -28,6 +28,8 @@ use LibreNMS\Alert\AlertData;
 use LibreNMS\Alerting\QueryBuilderParser;
 use LibreNMS\Authentication\LegacyAuth;
 use LibreNMS\Alert\AlertUtil;
+use LibreNMS\Config;
+use PHPMailer\PHPMailer\PHPMailer;
 
 /**
  * @param $rule
@@ -150,19 +152,12 @@ function GetRules($device_id)
 
 /**
  * Check if device is under maintenance
- * @param int $device Device-ID
- * @return int
+ * @param int $device_id Device-ID
+ * @return bool
  */
-function IsMaintenance($device)
+function IsMaintenance($device_id)
 {
-    $groups = GetGroupsFromDevice($device);
-    $params = array($device);
-    $where = "";
-    foreach ($groups as $group) {
-        $where .= " || alert_schedule_items.target = ?";
-        $params[] = 'g'.$group;
-    }
-    return dbFetchCell('SELECT alert_schedule.schedule_id FROM alert_schedule LEFT JOIN alert_schedule_items ON alert_schedule.schedule_id=alert_schedule_items.schedule_id WHERE ( alert_schedule_items.target = ?'.$where.' ) && ((alert_schedule.recurring = 0 AND (NOW() BETWEEN alert_schedule.start AND alert_schedule.end)) OR (alert_schedule.recurring = 1 AND (alert_schedule.start_recurring_dt <= date_format(NOW(), \'%Y-%m-%d\') AND (end_recurring_dt >= date_format(NOW(), \'%Y-%m-%d\') OR end_recurring_dt is NULL OR end_recurring_dt = \'0000-00-00\' OR end_recurring_dt = \'\')) AND (date_format(now(), \'%H:%i:%s\') BETWEEN `start_recurring_hr` AND end_recurring_hr) AND (recurring_day LIKE CONCAT(\'%\',date_format(now(), \'%w\'),\'%\') OR recurring_day is null or recurring_day = \'\'))) LIMIT 1', $params);
+    return \App\Models\Device::find($device_id)->isUnderMaintenance();
 }
 /**
  * Run all rules for a device
@@ -260,13 +255,14 @@ function RunRules($device_id)
  */
 function GetContacts($results)
 {
-    global $config, $authorizer;
+    global $config;
 
-    if (sizeof($results) == 0) {
-        return array();
+    if (empty($results)) {
+        return [];
     }
-    if ($config['alert']['default_only'] === true || $config['alerts']['email']['default_only'] === true) {
-        return array(''.($config['alert']['default_mail'] ? $config['alert']['default_mail'] : $config['alerts']['email']['default']) => '');
+    if (Config::get('alert.default_only') === true || Config::get('alerts.email.default_only') === true) {
+        $email = Config::get('alert.default_mail', Config::get('alerts.email.default'));
+        return $email ? [$email => ''] : [];
     }
     $users = LegacyAuth::get()->getUserlist();
     $contacts = array();
@@ -391,20 +387,6 @@ function populate($txt, $wrap = true)
     }//end foreach
     return $txt;
 }//end populate()
-
-/**
- * "Safely" run eval
- * @param string $code Code to run
- * @param array  $obj  Object with variables
- * @return string|mixed
- */
-function RunJail($code, $obj)
-{
-    $ret = '';
-    @eval($code);
-    return $ret;
-}//end RunJail()
-
 
 /**
  * Describe Alert
@@ -828,8 +810,6 @@ function RunAlerts()
  */
 function ExtTransports($obj)
 {
-    global $config;
-    $tmp = false;
     $type  = new Template;
 
     // If alert transport mapping exists, override the default transports
@@ -837,47 +817,28 @@ function ExtTransports($obj)
 
     if (!$transport_maps) {
         $transport_maps = AlertUtil::getDefaultAlertTransports();
-        $legacy_transports = array_unique(array_map(function ($transports) {
-            return $transports['transport_type'];
-        }, $transport_maps));
-        foreach ($config['alert']['transports'] as $transport => $opts) {
-            if (in_array($transport, $legacy_transports)) {
-                // If it is a default transport type, then the alert has already been sent out, so skip
-                continue;
-            }
-            if (is_array($opts)) {
-                $opts = array_filter($opts);
-            }
-            $class  = 'LibreNMS\\Alert\\Transport\\' . ucfirst($transport);
-            if (($opts === true || !empty($opts)) && $opts != false && class_exists($class)) {
-                $transport_maps[] = [
-                    'transport_id' => null,
-                    'transport_type' => $transport,
-                    'opts' => $opts,
-                    'legacy' => true,
-                ];
-            }
-        }
-        unset($legacy_transports);
+    }
+
+    // alerting for default contacts, etc
+    if (Config::get('alert.transports.mail') === true && !empty($obj['contacts'])) {
+        $transport_maps[] = [
+            'transport_id' => null,
+            'transport_type' => 'mail',
+            'opts' => $obj,
+        ];
     }
 
     foreach ($transport_maps as $item) {
         $class = 'LibreNMS\\Alert\\Transport\\'.ucfirst($item['transport_type']);
-        //FIXME remove Deprecated noteice
-        $dep_notice = 'DEPRECATION NOTICE: https://t.libren.ms/deprecation-alerting';
         if (class_exists($class)) {
             //FIXME remove Deprecated transport
-            $transport_title = ($item['legacy'] === true) ? "Transport {$item['transport_type']} (%YTransport $dep_notice%n)" : "Transport {$item['transport_type']}";
+            $transport_title = "Transport {$item['transport_type']}";
             $obj['transport'] = $item['transport_type'];
             $obj['transport_name'] = $item['transport_name'];
             $obj['alert']     = new AlertData($obj);
             $obj['title']     = $type->getTitle($obj);
             $obj['alert']['title'] = $obj['title'];
             $obj['msg']       = $type->getBody($obj);
-            //FIXME remove Deprecated template check
-            if (preg_match('/{\/if}/', $type->getTemplate()->template)) {
-                c_echo(" :: %YTemplate $dep_notice :: Please update your template " . $type->getTemplate()->name . "%n" . PHP_EOL);
-            }
             c_echo(" :: $transport_title => ");
             $instance = new $class($item['transport_id']);
             $tmp = $instance->deliverAlert($obj, $item['opts']);
