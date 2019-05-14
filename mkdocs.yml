@@ -76,6 +76,7 @@ nav:
       - Extensions/IRC-Bot-Extensions.md
       - Extensions/SNMP-Proxy.md
       - Extensions/SNMP-Trap-Handler.md
+      - Extensions/Customizing-the-Web-UI.md
       - Support/Cleanup-options.md
   - 6. 3rd Party Integration:
       - Extensions/Gateone.md
@@ -135,6 +136,7 @@ nav:
       - Support/Device-Sensors.md
   - 10. Contributing + Developing:
       - Contributing: Developing/index.md
+      - Developing/Getting-Started.md
       - Developing/Using-Git.md
       - Developing/Code-Guidelines.md
       - Developing/Style-Guidelines.md
