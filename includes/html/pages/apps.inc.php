@@ -1,5 +1,66 @@
 <?php
 $pagetitle[] = 'Apps';
+$grphs['svdmempressure']  = array(
+	'pressure',
+);
+
+$graphs['svdport4552']    = array(
+    'dead_port',
+);
+
+$graphs['svdheartbeat']    = array(
+    'missedbeat',
+);
+
+$graphs['svdcrashes']    = array(
+    'count',
+);
+
+$graphs['svdmemory']    = array(
+    'mem',
+);
+
+
+$graphs['svdproc']    = array(
+    'cpu',
+);
+
+
+$graphs['svdmd']    = array(
+    'md',
+);
+
+$graphs['svdport4552']    = array(
+    'dead_port',
+);
+
+$graphs['svdheartbeat']    = array(
+    'missedbeat',
+);
+
+$graphs['svdcrashes']    = array(
+    'count',
+);
+
+$graphs['svdmemory']    = array(
+    'mem',
+);
+
+
+$graphs['svdproc']    = array(
+    'cpu',
+);
+
+
+$graphs['svdmd']    = array(
+    'md',
+);
+
+$graphs['svdisplayapp']    = array(
+    'mem',
+    'cpu',
+    'visible'
+);
 $graphs['apache']    = array(
     'bits',
     'hits',
