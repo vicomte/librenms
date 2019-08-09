@@ -46,6 +46,7 @@ $pagetitle[] = 'Oxidized';
                 </div>
                 <div class="tab-pane fade" id="search">
                     <form class="form-horizontal" action="" method="post">
+                        <?php echo csrf_field() ?>
                         <br/>
                         <div class="input-group">
                             <input type="text" class="form-control" id="input-parameter"
@@ -81,7 +82,7 @@ $pagetitle[] = 'Oxidized';
                 $('#search-output').empty();
                 $("#search-output").show();
                 if (data.output)
-                    $('#search-output').append('Config appears on the folllowing device(s):<br />');
+                    $('#search-output').append('Config appears on the following device(s):<br />');
                     $.each(data.output, function (row, value) {
                         $('#search-output').append(value['full_name'] + '<br />');
                 });

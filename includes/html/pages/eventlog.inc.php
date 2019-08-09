@@ -39,6 +39,7 @@ $pagetitle[] = 'Eventlog';
     $('.actionBar').append(
         '<div class="pull-left">' +
         '<form method="post" action="" class="form-inline" role="form" id="result_form">' +
+        '<?php echo csrf_field() ?>' +
         <?php
         if (!isset($vars['fromdevice'])) {
         ?>
@@ -82,7 +83,7 @@ $pagetitle[] = 'Eventlog';
         allowClear: true,
         placeholder: "All Devices",
         ajax: {
-            url: 'ajax/select/device',
+            url: '<?php echo url('/ajax/select/device'); ?>',
             delay: 200
         }
     })<?php echo $device_id ? ".val($device_id).trigger('change');" : ''; ?>;
@@ -95,7 +96,7 @@ $pagetitle[] = 'Eventlog';
         allowClear: true,
         placeholder: "All Types",
         ajax: {
-            url: 'ajax/select/eventlog',
+            url: '<?php echo url('/ajax/select/eventlog'); ?>',
             delay: 200,
             data: function(params) {
                 return {
