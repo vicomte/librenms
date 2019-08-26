@@ -455,6 +455,18 @@ function generate_entity_link($type, $entity, $text = null, $graph_type = null)
     return ($link);
 }//end generate_entity_link()
 
+/**
+ * Extract type and subtype from a complex graph type, also makes sure variables are file name safe.
+ * @param string $type
+ * @return array [type, subtype]
+ */
+function extract_graph_type($type): array
+{
+    preg_match('/^(?P<type>[A-Za-z0-9]+)_(?P<subtype>.+)/', $type, $graphtype);
+    $type = basename($graphtype['type']);
+    $subtype = basename($graphtype['subtype']);
+    return [$type, $subtype];
+}
 
 function generate_port_link($port, $text = null, $type = null, $overlib = 1, $single_graph = 0)
 {
@@ -1512,6 +1524,34 @@ function generate_stacked_graphs($transparency = '88')
     } else {
         return array('transparency' => '', 'stacked' => '-1');
     }
+}
+
+/**
+ * Parse AT time spec, does not handle the entire spec.
+ * @param string $time
+ * @return int
+ */
+function parse_at_time($time)
+{
+    if (is_numeric($time)) {
+        return $time < 0 ? time() + $time : intval($time);
+    }
+
+    if (preg_match('/^[+-]\d+[hdmy]$/', $time)) {
+        $units = [
+            'm' => 60,
+            'h' => 3600,
+            'd' => 86400,
+            'y' => 31557600,
+        ];
+        $value = substr($time, 1, -1);
+        $unit = substr($time, -1);
+
+        $offset = ($time[0] == '-' ? -1 : 1) * $units[$unit] * $value;
+        return time() + $offset;
+    }
+
+    return (int)strtotime($time);
 }
 
 /**

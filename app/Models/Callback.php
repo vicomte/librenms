@@ -1,8 +1,8 @@
 <?php
 /**
- * groups.inc.php
+ * Callback.php
  *
- * List groups
+ * -Description-
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,36 +23,24 @@
  * @author     Tony Murray <murraytony@gmail.com>
  */
 
-if (!Auth::user()->hasGlobalRead()) {
-    return [];
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Callback extends Model
+{
+    public $timestamps = false;
+    protected $table = 'callback';
+    protected $primaryKey = 'callback_id';
+    protected $fillable = ['name', 'value'];
+
+    public static function get($name)
+    {
+        return static::query()->where('name', $name)->value('value');
+    }
+
+    public static function set($name, $value)
+    {
+        return static::query()->updateOrCreate(['name' => $name], ['name' => $name, 'value' => $value]);
+    }
 }
-
-$query = '';
-$params = [];
-
-if (!empty($_REQUEST['search'])) {
-    $query .= ' WHERE `name` LIKE ?';
-    $params[] = '%' . mres($_REQUEST['search']) . '%';
-}
-
-
-$total = dbFetchCell("SELECT COUNT(*) FROM `device_groups` $query", $params);
-$more = false;
-
-if (!empty($_REQUEST['limit'])) {
-    $limit = (int) $_REQUEST['limit'];
-    $page = isset($_REQUEST['page']) ? (int) $_REQUEST['page'] : 1;
-    $offset = ($page - 1) * $limit;
-
-    $query .= " LIMIT $offset, $limit";
-} else {
-    $offset = 0;
-}
-
-
-$sql = "SELECT `id`, `name` AS `text` FROM `device_groups` $query order by `name`";
-$groups = dbFetchRows($sql, $params);
-
-$more = ($offset + count($groups)) < $total;
-
-return [$groups, $more];
