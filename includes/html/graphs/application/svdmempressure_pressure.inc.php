@@ -3,7 +3,7 @@
 $scale_min = 0;
 
 require 'includes/graphs/common.inc.php';
-
+error_log("doing this!");
 $apache_rrd = rrd_name($device['hostname'], array('app', 'svdmempressure', $app['app_id']));
 
 if (rrdtool_check_rrd_exists($apache_rrd)) {
@@ -20,6 +20,6 @@ $colour_area_max = 'FFEE99';
 $graph_max  = 4;
 $multiplier = 1;
 
-$unit_text = 'bytes';
+$unit_text = 'units';
 
 require 'includes/graphs/generic_simplex.inc.php';
