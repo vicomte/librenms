@@ -657,12 +657,12 @@ function discover_processor(&$valid, $device, $oid, $index, $type, $descr, $prec
 
 //end discover_processor()
 
-function discover_mempool(&$valid, $device, $index, $type, $descr, $precision = '1', $entPhysicalIndex = null, $hrDeviceIndex = null)
+function discover_mempool(&$valid, $device, $index, $type, $descr, $precision = '1', $entPhysicalIndex = null, $hrDeviceIndex = null, $perc_warn = '90')
 {
 
     $descr = substr($descr, 0, 64);
 
-    d_echo("Discover Mempool: $index, $type, $descr, $precision, $entPhysicalIndex, $hrDeviceIndex\n");
+    d_echo("Discover Mempool: $index, $type, $descr, $precision, $entPhysicalIndex, $hrDeviceIndex, $perc_warn\n");
 
     // FIXME implement the mempool_perc, mempool_used, etc.
     if ($descr) {
@@ -677,6 +677,7 @@ function discover_mempool(&$valid, $device, $index, $type, $descr, $precision = 
                 'mempool_used' => 0,
                 'mempool_free' => 0,
                 'mempool_total' => 0,
+                'mempool_perc_warn' => $perc_warn,
             );
 
             if (is_numeric($entPhysicalIndex)) {
@@ -1159,9 +1160,9 @@ function dynamic_discovery_get_value($name, $index, $discovery_data, $pre_cache,
  */
 function sensors($types, $device, $valid, $pre_cache = array())
 {
-    foreach ((array)$types as $sensor_type) {
-        echo ucfirst($sensor_type) . ': ';
-        $dir = Config::get('install_dir') . '/includes/discovery/sensors/' . $sensor_type .'/';
+    foreach ((array)$types as $sensor_class) {
+        echo ucfirst($sensor_class) . ': ';
+        $dir = Config::get('install_dir') . '/includes/discovery/sensors/' . $sensor_class .'/';
 
         if (is_file($dir . $device['os_group'] . '.inc.php')) {
             include $dir . $device['os_group'] . '.inc.php';
@@ -1174,9 +1175,9 @@ function sensors($types, $device, $valid, $pre_cache = array())
                 include $dir . '/rfc1628.inc.php';
             }
         }
-        discovery_process($valid, $device, $sensor_type, $pre_cache);
-        d_echo($valid['sensor'][$sensor_type]);
-        check_valid_sensors($device, $sensor_type, $valid['sensor']);
+        discovery_process($valid, $device, $sensor_class, $pre_cache);
+        d_echo($valid['sensor'][$sensor_class]);
+        check_valid_sensors($device, $sensor_class, $valid['sensor']);
         echo "\n";
     }
 }

@@ -30,7 +30,7 @@ use LibreNMS\DB\Eloquent;
 class Version
 {
     // Update this on release
-    const VERSION = '1.54';
+    const VERSION = '1.57';
 
     protected $is_git_install = false;
 
@@ -77,15 +77,15 @@ class Version
 
     public function gitChangelog()
     {
-        if ($this->is_git_install) {
-            return shell_exec('git log -10');
-        }
+        return $this->is_git_install
+            ? rtrim(shell_exec('git log -10'))
+            : '';
     }
 
     public function gitDate()
     {
-        if ($this->is_git_install) {
-            return shell_exec("git show --pretty='%ct' --no-patch HEAD");
-        }
+        return $this->is_git_install
+            ? rtrim(shell_exec("git show --pretty='%ct' -s HEAD"))
+            : '';
     }
 }
