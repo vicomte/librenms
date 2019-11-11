@@ -223,6 +223,16 @@ $graphs['nvidia'] = array(
     'sbecc',
     'dbecc',
 );
+$graphs['seafile'] = array(
+    'connected',
+    'enabled',
+    'libraries',
+    'trashed_libraries',
+    'size_consumption',
+    'groups',
+    'version',
+    'platform',
+);
 $graphs['squid'] = array(
     'memory',
     'clients',
@@ -291,6 +301,10 @@ $graphs['smart'] = array(
     'id199',
     'id231',
     'id233',
+);
+$graphs['certificate'] = array(
+    'age',
+    'remaining_days',
 );
 $graphs['mdadm'] = array(
     'level',

@@ -1,7 +1,7 @@
 <?php
 /*
  * RunAlerts.php
- * 
+ *
  * Copyright (C) 2014 Daniel Preussker <f0o@devilcode.org>
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
  *
  * Modified by:
  * @author Heath Barnhart <barnhart@kanren.net>
- * 
+ *
  */
 
 namespace LibreNMS\Alert;
@@ -93,6 +93,8 @@ class RunAlerts
         $obj['ip']            = inet6_ntop($device['ip']);
         $obj['hardware']      = $device['hardware'];
         $obj['version']       = $device['version'];
+        $obj['serial']        = $device['serial'];
+        $obj['features']      = $device['features'];
         $obj['location']      = $device['location'];
         $obj['uptime']        = $device['uptime'];
         $obj['uptime_short']  = Time::formatInterval($device['uptime'], 'short');
@@ -103,6 +105,7 @@ class RunAlerts
         $obj['device_id']     = $alert['device_id'];
         $obj['rule_id']       = $alert['rule_id'];
         $obj['id']            = $alert['id'];
+        $obj['proc']          = $alert['proc'];
         $obj['status']        = $device['status'];
         $obj['status_reason'] = $device['status_reason'];
         if (can_ping_device($attribs)) {
@@ -355,7 +358,7 @@ class RunAlerts
         $alerts = [];
         foreach (dbFetchRows("SELECT alerts.id, alerts.device_id, alerts.rule_id, alerts.state, alerts.note, alerts.info FROM alerts WHERE $where") as $alert_status) {
             $alert = dbFetchRow(
-                'SELECT alert_log.id,alert_log.rule_id,alert_log.device_id,alert_log.state,alert_log.details,alert_log.time_logged,alert_rules.rule,alert_rules.severity,alert_rules.extra,alert_rules.name,alert_rules.query,alert_rules.builder FROM alert_log,alert_rules WHERE alert_log.rule_id = alert_rules.id && alert_log.device_id = ? && alert_log.rule_id = ? && alert_rules.disabled = 0 ORDER BY alert_log.id DESC LIMIT 1',
+                'SELECT alert_log.id,alert_log.rule_id,alert_log.device_id,alert_log.state,alert_log.details,alert_log.time_logged,alert_rules.rule,alert_rules.severity,alert_rules.extra,alert_rules.name,alert_rules.query,alert_rules.builder,alert_rules.proc FROM alert_log,alert_rules WHERE alert_log.rule_id = alert_rules.id && alert_log.device_id = ? && alert_log.rule_id = ? && alert_rules.disabled = 0 ORDER BY alert_log.id DESC LIMIT 1',
                 array($alert_status['device_id'], $alert_status['rule_id'])
             );
 
@@ -523,9 +526,13 @@ class RunAlerts
                 $obj['alert']['title'] = $obj['title'];
                 $obj['msg']       = $type->getBody($obj);
                 c_echo(" :: $transport_title => ");
-                $instance = new $class($item['transport_id']);
-                $tmp = $instance->deliverAlert($obj, $item['opts']);
-                $this->alertLog($tmp, $obj, $obj['transport']);
+                try {
+                    $instance = new $class($item['transport_id']);
+                    $tmp = $instance->deliverAlert($obj, $item['opts']);
+                    $this->alertLog($tmp, $obj, $obj['transport']);
+                } catch (\Exception $e) {
+                    $this->alertLog($e, $obj, $obj['transport']);
+                }
                 unset($instance);
                 echo PHP_EOL;
             }
