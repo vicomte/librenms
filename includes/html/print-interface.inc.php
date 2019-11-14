@@ -177,7 +177,7 @@ if ($port_adsl['adslLineCoding']) {
 echo '</td>';
 echo '<td width=375 valign=top class="interface-desc">';
 
-$neighborsCount=0;
+$neighborsCount=1;
 $nbLinks=0;
 if (strpos($port['label'], 'oopback') === false && !$graph_type) {
     foreach (dbFetchRows('SELECT * FROM `links` AS L, `ports` AS I, `devices` AS D WHERE L.local_port_id = ? AND L.remote_port_id = I.port_id AND I.device_id = D.device_id', array($if_id)) as $link) {
@@ -234,45 +234,53 @@ if (strpos($port['label'], 'oopback') === false && !$graph_type) {
         }//end foreach
     }//end if
 
-    if (count($int_links) > 3) {
-        echo '<div class="collapse-neighbors"><i class="neighbors-button fa fa-plus fa-lg" aria-hidden="true"></i>
-               <span class="neighbors-interface-list-firsts" style="display: inline;">';
-    }
 
 
     if ($port_details && Config::get('enable_port_relationship') === true && port_permitted($int_link, $device['device_id'])) {
+        $delayWrite = "";
         foreach ($int_links as $int_link) {
-            $neighborsCount++;
-            if ($neighborsCount == 4) {
-                echo '<span class="neighbors-list-continued" style="display: inline;"></br>[...]</span>';
-                echo '</span>';
-                echo '<span class="neighbors-interface-list" style="display: none;">';
-            }
             $link_if = dbFetchRow('SELECT * from ports AS I, devices AS D WHERE I.device_id = D.device_id and I.port_id = ?', array($int_link));
             $link_if = cleanPort($link_if);
-            echo "$br";
 
-            if ($int_links_phys[$int_link]) {
-                echo "<i class='fa fa-plus fa-lg' style='color:black' aria-hidden='true'></i> ";
-            } else {
-                echo "<i class='fa fa-arrow-right fa-lg' style='color:green' aria-hidden='true'></i> ";
+            if (port_permitted($int_link, shorthost($link_if['hostname']))) {
+
+              if ($neighborsCount == 3) {
+                  $delayWrite .=  '<span class="neighbors-list-continued" style="display: inline;"></br>[...]</span>';
+                  $delayWrite .= '</span>';
+                  $delayWrite .= '<span class="neighbors-interface-list" style="display: none;">';
+              }
+              $delayWrite .= "$br";
+              if ($int_links_phys[$int_link]) {
+                  $delayWrite .= "<i class='fa fa-plus fa-lg' style='color:black' aria-hidden='true'></i> ";
+              } else {
+                  $delayWrite .= "<i class='fa fa-arrow-right fa-lg' style='color:green' aria-hidden='true'></i> ";
+              } 
+
+              $delayWrite .= '<b>'.generate_port_link($link_if, makeshortif($link_if['label'])).' on '.generate_device_link($link_if, shorthost($link_if['hostname']));
+
+
+              if ($int_links_v6[$int_link]) {
+                  $delayWrite .= " <b style='color: #a10000;'>v6</b>";
+              }   
+
+              if ($int_links_v4[$int_link]) {
+                  $delayWrite .= " <b style='color: #00a100'>v4</b>";
+              }   
+              $br = '<br />';
+
+              $neighborsCount++;
             }
+          }
 
-            echo '<b>'.generate_port_link($link_if, makeshortif($link_if['label'])).' on '.generate_device_link($link_if, shorthost($link_if['hostname']));
+          if ($neighborsCount > 2) {
+              echo '<div class="collapse-neighbors"><i class="neighbors-button fa fa-plus fa-lg" aria-hidden="true"></i>
+                     <span class="neighbors-interface-list-firsts" style="display: inline;">';
+          }
+	  echo $delayWrite;
 
-            if ($int_links_v6[$int_link]) {
-                echo " <b style='color: #a10000;'>v6</b>";
-            }
-
-            if ($int_links_v4[$int_link]) {
-                echo " <b style='color: #00a100'>v4</b>";
-            }
-
-            $br = '<br />';
-        }//end foreach
     }//end if
 
-    // unset($int_links, $int_links_v6, $int_links_v4, $int_links_phys, $br);
+    // unset($int_links, $int_links_v6, $int_links_v4, $int_links_phys, $br, $delayWrite);
 }//end if
 
 if ($port_details && Config::get('enable_port_relationship') === true && port_permitted($port['port_id'], $device['device_id'])) {
