@@ -177,7 +177,7 @@ if ($port_adsl['adslLineCoding']) {
 echo '</td>';
 echo '<td width=375 valign=top class="interface-desc">';
 
-$neighborsCount=1;
+$neighborsCount=0;
 $nbLinks=0;
 if (strpos($port['label'], 'oopback') === false && !$graph_type) {
     foreach (dbFetchRows('SELECT * FROM `links` AS L, `ports` AS I, `devices` AS D WHERE L.local_port_id = ? AND L.remote_port_id = I.port_id AND I.device_id = D.device_id', array($if_id)) as $link) {
@@ -244,7 +244,7 @@ if (strpos($port['label'], 'oopback') === false && !$graph_type) {
 
             if (port_permitted($int_link, shorthost($link_if['hostname']))) {
 
-              if ($neighborsCount == 3) {
+              if ($neighborsCount == 4) {
                   $delayWrite .=  '<span class="neighbors-list-continued" style="display: inline;"></br>[...]</span>';
                   $delayWrite .= '</span>';
                   $delayWrite .= '<span class="neighbors-interface-list" style="display: none;">';
@@ -272,7 +272,7 @@ if (strpos($port['label'], 'oopback') === false && !$graph_type) {
             }
           }
 
-          if ($neighborsCount > 2) {
+          if ($neighborsCount > 3) {
               echo '<div class="collapse-neighbors"><i class="neighbors-button fa fa-plus fa-lg" aria-hidden="true"></i>
                      <span class="neighbors-interface-list-firsts" style="display: inline;">';
           }
